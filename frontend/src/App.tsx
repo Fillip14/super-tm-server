@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useWebSocket } from './hooks/useWebSocket';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const { status, logs } = useWebSocket();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: 20, fontFamily: 'monospace' }}>
+      <h2>Status do Bot</h2>
+      {status ? (
+        <div>
+          <p>HP: {status.hp}%</p>
+          <p>MP: {status.mp}%</p>
+          <p>Hunt: {status.hunt ? 'ativo' : 'parado'}</p>
+          <p>Heal: {status.heal ? 'ativo' : 'parado'}</p>
+          <p>Screenshot: {status.screenshot ? 'ativo' : 'parado'}</p>
+          <p>Posição do char: {status.pos_char}</p>
+          <p>Andar: {status.lvl_map}</p>
+        </div>
+      ) : (
+        <p>Aguardando bot...</p>
+      )}
 
-export default App
+      <h2>Logs</h2>
+      <div
+        style={{ background: '#111', color: '#0f0', padding: 10, height: 300, overflowY: 'auto' }}
+      >
+        {logs.map((log, i) => (
+          <div key={i}>
+            [{log.timestamp}] [{log.level}] {log.message}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
