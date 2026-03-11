@@ -4,7 +4,7 @@ import { broadcast } from '../../../index';
 
 export const statusController = asyncHandler(async (req: Request, res: Response) => {
   const { data } = req.body;
-  console.log(data);
+  // console.log(data);
 
   broadcast({ type: 'status', data });
 

@@ -8,6 +8,10 @@ const API_PREFIX = '/api';
 
 export const app = express();
 
+app.get('/health', (_req, res) => {
+  res.json({ ok: true });
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(API_PREFIX, routesStatus);
