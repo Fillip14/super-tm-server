@@ -6,8 +6,7 @@ export function useWebSocket() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   useEffect(() => {
-    const wsUrl = import.meta.env.RAILWAY_WS_URL || 'ws://localhost:4000';
-    const ws = new WebSocket(wsUrl);
+    const ws = new WebSocket(import.meta.env.RAILWAY_WS_URL || 'ws://localhost:4000');
 
     ws.onmessage = (event) => {
       const msg: WsMessage = JSON.parse(event.data);
