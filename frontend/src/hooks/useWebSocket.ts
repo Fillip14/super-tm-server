@@ -6,7 +6,7 @@ export function useWebSocket() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   useEffect(() => {
-    const ws = new WebSocket(import.meta.env.NEXT_PUBLIC_RAILWAY_WS_URL);
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
     ws.onmessage = (event) => {
       const msg: WsMessage = JSON.parse(event.data);
