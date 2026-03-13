@@ -10,6 +10,12 @@ const API_PREFIX = '/api';
 
 export const app = express();
 
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'https://super-tm-server.vercel.app'],
+  }),
+);
+
 app.get('/health', (_req, res) => {
   res.json({ ok: true });
 });
