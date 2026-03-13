@@ -7,6 +7,7 @@ export function useWebSocket() {
 
   useEffect(() => {
     const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+    // const ws = new WebSocket('ws://localhost:4000');
 
     ws.onmessage = (event) => {
       const msg: WsMessage = JSON.parse(event.data);
