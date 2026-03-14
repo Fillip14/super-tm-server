@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 4000;
 
 const server = createServer(app);
 
-initWebSocket(server);
+initWebSocket(server, process.env.BOT_SECRET!);
 
 server.listen(PORT, () => {
   logger.info(`Servidor rodando na porta ${PORT}`);
