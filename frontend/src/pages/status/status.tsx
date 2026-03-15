@@ -1,7 +1,7 @@
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
-export default function Dashboard() {
-  const { status, logs } = useWebSocket();
+export default function Status() {
+  const { status, logs, sendAction } = useWebSocket();
 
   return (
     <div style={{ padding: 20, fontFamily: 'monospace' }}>
@@ -27,6 +27,16 @@ export default function Dashboard() {
       ) : (
         <p>Aguardando bot...</p>
       )}
+
+      <h2>Ações</h2>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button onClick={() => sendAction('program', 'start')}>Iniciar Programa</button>
+        <button onClick={() => sendAction('program', 'stop')}>Parar Programa</button>
+        <button onClick={() => sendAction('hunt', 'start')}>Start Hunt</button>
+        <button onClick={() => sendAction('hunt', 'stop')}>Stop Hunt</button>
+        <button onClick={() => sendAction('heal', 'start')}>Iniciar Heal</button>
+        <button onClick={() => sendAction('heal', 'stop')}>Parar Heal</button>
+      </div>
 
       <h2>Logs</h2>
       <div

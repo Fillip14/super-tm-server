@@ -1,1 +1,7 @@
 Servidor web para o projeto Super TM
+
+## License
+
+Copyright (c) 2026 Fillip. All rights reserved.
+
+This software is proprietary and confidential. Unauthorized copying, distribution, modification, or use is strictly prohibited.

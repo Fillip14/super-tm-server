@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+.home-root {
+  --mx: 50%;
+  --my: 50%;
+  --bg: #080b10;
+  --surface: #0e1420;
+  --border: rgba(255, 255, 255, 0.06);
+  --accent: #00e5ff;
+  --accent2: #7b61ff;
+  --text: #e8eaf0;
+  --text-muted: #5a6070;
+
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  padding: 60px 40px;
+  font-family: 'Syne', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid background */
+.home-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at var(--mx) var(--my), black 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Glow */
+.home-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.06) 0%, transparent 70%);
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Content */
+.home-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 480px;
+  z-index: 1;
+  animation: fadeUp 0.6s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Badge */
+.home-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 100px;
+  width: fit-content;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* Title */
+.home-title {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0;
+  line-height: 1;
+}
+
+.title-line {
+  font-size: 88px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.04em;
+}
+
+.title-line.accent {
+  color: var(--accent);
+  text-shadow: 0 0 40px rgba(0, 229, 255, 0.4);
+}
+
+/* Subtitle */
+.home-subtitle {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Stats */
+.home-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+}
+
+/* Buttons */
+.home-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-signin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: #080b10;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-signin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-signin:hover::before {
+  opacity: 0.1;
+}
+.btn-signin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.3);
+}
+.btn-signin:active {
+  transform: translateY(0);
+}
+
+.btn-arrow {
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+
+.btn-signin:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.btn-signup {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-signup:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+
+/* Terminal card */
+.home-terminal {
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 300px;
+  overflow: hidden;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  animation: fadeUp 0.6s 0.15s ease both;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot.red {
+  background: #ff5f57;
+}
+.dot.yellow {
+  background: #febc2e;
+}
+.dot.green {
+  background: #28c840;
+}
+
+.terminal-title {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.terminal-body {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.terminal-body p {
+  margin: 0;
+}
+
+.log-time {
+  color: #3a4050;
+}
+.log-ok {
+  color: #28c840;
+}
+.log-info {
+  color: var(--accent);
+}
+
+.log-blink .log-ok {
+  animation: blink 1s ease-in-out infinite;
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .home-root {
+    flex-direction: column;
+    gap: 40px;
+    align-items: flex-start;
+    padding: 40px 24px;
+  }
+  .home-terminal {
+    width: 100%;
+  }
+  .title-line {
+    font-size: 64px;
+  }
+}
