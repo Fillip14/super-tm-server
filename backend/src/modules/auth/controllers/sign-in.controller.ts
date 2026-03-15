@@ -7,28 +7,14 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
   const userData = res.locals.validated;
   const isDesktop = req.headers['client-type'] === 'desktop';
+  const isWeb = req.headers['client-type'] === 'web';
 
   const { authToken, product } = await signService(userData);
 
-  if (isDesktop) {
-    logger.info('Login desktop realizado com sucesso.');
-    res
-      .status(HttpStatus.OK)
-      .json({
-        message: 'Login desktop realizado com sucesso.',
-        token: authToken,
-        user_plan: product,
-      });
-  } else {
-    res.cookie('auth', authToken, {
-      httpOnly: true,
-      secure: true,
-      // sameSite: 'strict',
-      sameSite: 'none',
-      maxAge: 5 * 60 * 1000,
-    });
-
-    logger.info('Login web realizado com sucesso.');
-    res.status(HttpStatus.OK).json({ message: 'Login web realizado com sucesso.' });
-  }
+  logger.info('Login realizado com sucesso.');
+  res.status(HttpStatus.OK).json({
+    message: 'Login realizado com sucesso.',
+    token: authToken,
+    user_plan: product,
+  });
 });
