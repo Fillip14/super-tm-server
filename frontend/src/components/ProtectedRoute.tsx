@@ -13,24 +13,32 @@ export default function ProtectedRoute({ children }: Props) {
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/auth/verify-session`, {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then((res) => {
-        setAuthenticated(res.ok);
-      })
-      .catch(() => {
+    const check = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
         setAuthenticated(false);
-      })
-      .finally(() => {
         setChecking(false);
-      });
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/auth/verify-session`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAuthenticated(res.ok);
+      } catch {
+        setAuthenticated(false);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    check();
   }, []);
 
-  if (checking) return null; // ou um spinner se preferires
-
+  if (checking) return null;
   if (!authenticated) return <Navigate to="/login" />;
-
   return <>{children}</>;
 }

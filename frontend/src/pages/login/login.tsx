@@ -23,12 +23,13 @@ export default function Login() {
     try {
       const res = await fetch(`${API_URL}/api/auth/signin`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'client-type': 'web' },
         body: JSON.stringify({ provider: email, password }),
       });
 
       if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('token', data.token);
         navigate('/status');
       } else {
         const data = await res.json().catch(() => ({}));

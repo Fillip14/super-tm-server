@@ -28,7 +28,7 @@ export const signService = async (siginData: SignIn) => {
       { user_id: authData.user_id, type: authData.role },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: 5 * 60,
+        expiresIn: 60 * 60 * 24,
       },
     ),
     product: userData.product,
