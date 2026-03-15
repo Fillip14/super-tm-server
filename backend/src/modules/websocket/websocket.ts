@@ -2,7 +2,6 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { parse as parseCookie } from 'cookie';
 import logger from '../../utils/log/logger';
 
 export let wss: WebSocketServer;
@@ -20,7 +19,16 @@ function verifyToken(token: string): string | null {
 }
 
 function getUserIdFromRequest(req: IncomingMessage): { userId: string | null; isDesktop: boolean } {
-  // Bot: manda Authorization: Bearer <token>]
+  const url = new URL(req.url!, `http://localhost`);
+  const queryToken = url.searchParams.get('token');
+  const clientType = url.searchParams.get('client');
+
+  if (queryToken) {
+    const userId = verifyToken(queryToken);
+    if (userId) return { userId, isDesktop: clientType === 'desktop' };
+  }
+
+  // Bot Python: manda Authorization: Bearer <token>
   const authHeader = req.headers['authorization'];
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
@@ -28,15 +36,6 @@ function getUserIdFromRequest(req: IncomingMessage): { userId: string | null; is
     if (userId) return { userId, isDesktop: true };
   }
 
-  // // Browser: manda cookie auth=<token>
-  const cookieHeader = req.headers['cookie'];
-  if (cookieHeader) {
-    const cookies = parseCookie(cookieHeader);
-    if (cookies.auth) {
-      const userId = verifyToken(cookies.auth);
-      if (userId) return { userId, isDesktop: false };
-    }
-  }
   return { userId: null, isDesktop: false };
 }
 

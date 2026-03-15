@@ -7,8 +7,10 @@ export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
-    // const ws = new WebSocket('ws://localhost:4000');
+    const token = localStorage.getItem('token');
+    const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}&client=web`);
+    // const ws = new WebSocket(`ws://localhost:4000/?token=${token}&client=web`);
+
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
