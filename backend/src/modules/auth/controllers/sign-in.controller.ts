@@ -6,20 +6,25 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
   const userData = res.locals.validated;
-  const isBot = req.headers['client-type'] === 'bot';
+  const isDesktop = req.headers['client-type'] === 'desktop';
 
   const { authToken, product } = await signService(userData);
 
-  if (isBot) {
-    logger.info('Login bot realizado com sucesso.');
+  if (isDesktop) {
+    logger.info('Login desktop realizado com sucesso.');
     res
       .status(HttpStatus.OK)
-      .json({ message: 'Login bot realizado com sucesso.', token: authToken, user_plan: product });
+      .json({
+        message: 'Login desktop realizado com sucesso.',
+        token: authToken,
+        user_plan: product,
+      });
   } else {
     res.cookie('auth', authToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      // sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 5 * 60 * 1000,
     });
 
