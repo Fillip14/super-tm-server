@@ -1,9 +1,7 @@
-import { useWebSocket } from '../hooks/useWebSocket';
-// import { useActions } from '../hooks/useActions';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
-export default function Dashboard() {
+export default function Status() {
   const { status, logs, sendAction } = useWebSocket();
-  // const { sendAction } = useActions();
 
   return (
     <div style={{ padding: 20, fontFamily: 'monospace' }}>
