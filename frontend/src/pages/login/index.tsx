@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import './login.css';
 
-const API_URL = import.meta.env.VITE_API_URL;
-// const API_URL = 'http://localhost:4000';
-
-export default function Login() {
+export const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { checking, authenticated, signin } = useAuth();
+
+  useEffect(() => {
+    if (!checking && authenticated) {
+      navigate('/status');
+    }
+  }, [checking, authenticated, navigate]);
 
   async function handleLogin() {
     setError('');
@@ -21,20 +26,9 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'client-type': 'web' },
-        body: JSON.stringify({ provider: email, password }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('token', data.token);
-        navigate('/status');
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.message || 'Email ou senha inválidos.');
-      }
+      const result = await signin(email, password);
+      if (result.ok) navigate('/status');
+      else setError(result.message || 'Email ou senha inválidos.');
     } catch {
       setError('Sem conexão com o servidor.');
     } finally {
@@ -115,4 +109,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};
