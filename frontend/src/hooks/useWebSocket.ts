@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { BotStatus, LogEntry, WsMessage } from '../types/bot.types';
 
-export function useWebSocket() {
+export const useWebSocket = () => {
   const [status, setStatus] = useState<BotStatus | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -9,7 +9,6 @@ export function useWebSocket() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}?token=${token}&client=web`);
-    // const ws = new WebSocket(`ws://localhost:4000/?token=${token}&client=web`);
 
     wsRef.current = ws;
 
@@ -29,11 +28,11 @@ export function useWebSocket() {
     return () => ws.close();
   }, []);
 
-  function sendAction(category: string, action: string) {
+  const sendAction = useCallback((category: string, action: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ category, action }));
     }
-  }
+  }, []);
 
   return { status, logs, sendAction };
-}
+};
