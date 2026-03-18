@@ -23,13 +23,14 @@ export const signService = async (siginData: SignIn) => {
       suggestedAction: 'contact_support',
     });
 
+  const expiresAt = new Date(userData.expires_at).getTime();
+  const expiresIn = Math.floor((expiresAt - Date.now()) / 1000);
+
   return {
     authToken: jwt.sign(
       { user_id: authData.user_id, type: authData.role },
       process.env.JWT_SECRET as string,
-      {
-        expiresIn: 60 * 60 * 24,
-      },
+      { expiresIn },
     ),
     product: userData.product,
   };
