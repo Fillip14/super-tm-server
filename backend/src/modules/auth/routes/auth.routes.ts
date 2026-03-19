@@ -4,7 +4,7 @@ import { loginController } from '../controllers/sign-in.controller';
 import { signInSchema } from '../schemas/sign-in.schema';
 import { verifySessionController } from '../controllers/verify-session.controller';
 import { authMiddleware } from '../../../middlewares/auth.middleware';
-// import { logoutController } from '../controllers/logout.controller';
+import { logoutController } from '../controllers/logout.controller';
 // import { registerController } from '../controllers/sign-up.controller';
 // import { signUpSchema } from '../schemas/sign-up.schema';
 // import { checkDocController } from '../controllers/check-doc.controller';
@@ -20,7 +20,7 @@ routesAuth.post(
   authMiddleware('user'),
   verifySessionController,
 );
+routesAuth.post(AUTH_BASE_PATH + '/logout', authMiddleware('user', true), logoutController);
 // routesAuth.post(AUTH_BASE_PATH + '/signup', validate(signUpSchema), registerController);
-// routesAuth.post(AUTH_BASE_PATH + '/logout', logoutController);
 
 export default routesAuth;

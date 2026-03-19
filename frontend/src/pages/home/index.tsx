@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import './home.css';
 
-export default function Home() {
+export const Home = () => {
   const navigate = useNavigate();
   const gridRef = useRef<HTMLDivElement>(null);
+  const { checking, authenticated } = useAuth();
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -66,13 +68,23 @@ export default function Home() {
 
         {/* Buttons */}
         <div className="home-actions">
-          <button className="btn-signin" onClick={() => navigate('/login')}>
-            <span className="btn-text">Entrar</span>
-            <span className="btn-arrow">→</span>
-          </button>
-          <button className="btn-signup" onClick={() => {}}>
-            <span className="btn-text">Criar conta</span>
-          </button>
+          {checking ? null : authenticated ? (
+            <button className="btn-signin" onClick={() => navigate('/status')}>
+              <span className="btn-text">Dashboard</span>
+              <span className="btn-arrow">→</span>
+            </button>
+          ) : (
+            <>
+              <button className="btn-signin" onClick={() => navigate('/login')}>
+                <span className="btn-text">Entrar</span>
+                <span className="btn-arrow">→</span>
+              </button>
+
+              <button className="btn-signup">
+                <span className="btn-text">Criar conta</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -108,4 +120,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+};
