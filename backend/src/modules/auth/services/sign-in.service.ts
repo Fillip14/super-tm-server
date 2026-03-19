@@ -19,7 +19,7 @@ export const signService = async (siginData: SignIn) => {
   const userData = await findUserService(authData.user_id);
 
   if (!userData.active)
-    throw new AppError('Plano expirado.', HttpStatus.FORBIDDEN, {
+    throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED, {
       suggestedAction: 'contact_support',
     });
 
