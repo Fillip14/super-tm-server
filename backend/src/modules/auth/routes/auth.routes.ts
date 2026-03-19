@@ -20,7 +20,7 @@ routesAuth.post(
   authMiddleware('user'),
   verifySessionController,
 );
-routesAuth.post(AUTH_BASE_PATH + '/logout', authMiddleware('user'), logoutController);
+routesAuth.post(AUTH_BASE_PATH + '/logout', authMiddleware('user', true), logoutController);
 // routesAuth.post(AUTH_BASE_PATH + '/signup', validate(signUpSchema), registerController);
 
 export default routesAuth;
