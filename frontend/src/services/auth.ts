@@ -9,7 +9,6 @@ export const verifySession = async (token: string) => {
 };
 
 export const signinRequest = async (email: string, password: string) => {
-  console.log(email, password);
   const res = await fetch(`${API_URL}/api/auth/signin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'client-type': 'web' },
@@ -28,6 +27,6 @@ export const signinRequest = async (email: string, password: string) => {
 export const logoutRequest = async (token: string | null) => {
   await fetch(`${API_URL}/api/auth/logout`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, 'client-type': 'web' },
   });
 };
