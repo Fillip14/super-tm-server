@@ -62,9 +62,7 @@ export const initWebSocket = (server: Server): void => {
       ws.on('message', (raw) => {
         try {
           const { type, data } = JSON.parse(raw.toString());
-          if (type === 'status') {
-            sendToClient(userId, { type: 'status', data });
-          }
+          sendToClient(userId, { type, data });
         } catch {}
       });
 
