@@ -1,7 +1,5 @@
 export interface LogEntry {
   message: string;
-  level: string;
-  timestamp: string;
 }
 
 export interface BotStatus {

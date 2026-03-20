@@ -18,7 +18,7 @@ export const useWebSocket = () => {
       if (msg.type === 'status') {
         setStatus(msg.data);
       } else if (msg.type === 'log') {
-        setLogs((prev) => [msg.data, ...prev].slice(0, 100));
+        setLogs((prev) => [...msg.data, ...prev].slice(0, 100));
       }
     };
 
