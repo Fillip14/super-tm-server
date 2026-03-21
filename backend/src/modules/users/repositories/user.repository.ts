@@ -3,11 +3,11 @@ import { Table, Column } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import { HttpStatus } from '../../../constants/api.constants';
 
-export const findUser = async (uuid: string) => {
+export const findUser = async (field: string, value: string) => {
   const { data: userData, error: userError } = await supabase
     .from(Table.USERS)
     .select('*')
-    .eq(Column.UUID, uuid)
+    .eq(field, value)
     .maybeSingle();
 
   if (userError)

@@ -8,8 +8,8 @@ import { SignIn } from '../schemas/sign-in.schema';
 export const findAuth = async (itemToSearch: SignIn) => {
   const { data: authData, error: authError } = await supabase
     .from(Table.AUTH)
-    .select(`${Column.USER_ID}, ${Column.PROVIDER}, ${Column.PASSWORD_HASH}, ${Column.ROLE}`)
-    .eq(Column.PROVIDER, itemToSearch.provider)
+    .select(`${Column.USER_ID}, ${Column.EMAIL}, ${Column.PASSWORD_HASH}, ${Column.ROLE}`)
+    .eq(Column.EMAIL, itemToSearch.email)
     .maybeSingle();
 
   if (authError)

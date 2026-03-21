@@ -1,19 +1,18 @@
-// import { HttpStatus } from '../../../constants/api.constants';
-// import { AppError } from '../../../errors/AppError';
-// import { SignUp } from '../../auth/schemas/sign-up.schema';
 import { Column } from '../../../constants/database.constants';
 import { findUser, patchUser } from '../repositories/user.repository';
 
-export const findUserService = async (uuid: string) => {
-  const userData = await findUser(uuid);
+export const findUserService = async (field: string, value: string) => {
+  const userData = await findUser(field, value);
   const dateNow = new Date().toISOString();
 
-  if (userData.expires_at < dateNow) {
-    patchUser(Column.ACTIVE, false, uuid);
-    userData.active = false;
-  } else {
-    patchUser(Column.ACTIVE, true, uuid);
-    userData.active = true;
+  if (field == Column.UUID) {
+    if (userData.expires_at < dateNow) {
+      patchUser(Column.ACTIVE, false, value);
+      userData.active = false;
+    } else {
+      patchUser(Column.ACTIVE, true, value);
+      userData.active = true;
+    }
   }
 
   return userData;

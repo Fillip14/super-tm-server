@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
 import { findUserService } from '../users/services/user.service';
+import { Column } from '../../constants/database.constants';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import logger from '../../utils/log/logger';
 
@@ -47,7 +48,7 @@ export const initWebSocket = (server: Server): void => {
 
     const activeCheck = setInterval(
       async () => {
-        const user = await findUserService(userId);
+        const user = await findUserService(Column.UUID, userId);
         if (!user.active) {
           ws.close(1008, 'Unauthorized');
         }
