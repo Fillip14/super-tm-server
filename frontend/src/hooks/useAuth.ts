@@ -22,7 +22,6 @@ export const useAuth = () => {
         localStorage.removeItem('token');
         setAuthenticated(false);
       } finally {
-        localStorage.removeItem('token');
         setChecking(false);
       }
     };
