@@ -12,7 +12,7 @@ export const signinRequest = async (email: string, password: string) => {
   const res = await fetch(`${API_URL}/api/auth/signin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'client-type': 'web' },
-    body: JSON.stringify({ provider: email, password }),
+    body: JSON.stringify({ email, password }),
   });
 
   if (res.ok) {
@@ -29,4 +29,16 @@ export const logoutRequest = async (token: string | null) => {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'client-type': 'web' },
   });
+};
+
+export const signupRequest = async (email: string, password: string) => {
+  const res = await fetch(`${API_URL}/api/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'client-type': 'web' },
+    body: JSON.stringify({ email, password }),
+  });
+  if (res.ok) return { ok: true };
+
+  const data = await res.json().catch(() => ({}));
+  return { ok: false, message: data.error || data.message };
 };

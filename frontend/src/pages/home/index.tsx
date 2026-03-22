@@ -80,7 +80,7 @@ export const Home = () => {
                 <span className="btn-arrow">→</span>
               </button>
 
-              <button className="btn-signup">
+              <button className="btn-signup" onClick={() => navigate('/signup')}>
                 <span className="btn-text">Criar conta</span>
               </button>
             </>

@@ -1,4 +1,4 @@
-import { verifySession, signinRequest, logoutRequest } from '../services/auth';
+import { verifySession, signinRequest, logoutRequest, signupRequest } from '../services/auth';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,8 +19,10 @@ export const useAuth = () => {
       try {
         setAuthenticated(await verifySession(token));
       } catch {
+        localStorage.removeItem('token');
         setAuthenticated(false);
       } finally {
+        localStorage.removeItem('token');
         setChecking(false);
       }
     };
@@ -45,5 +47,9 @@ export const useAuth = () => {
     return res;
   }, []);
 
-  return { checking, authenticated, logout, signin };
+  const signup = useCallback(async (email: string, password: string) => {
+    return await signupRequest(email, password);
+  }, []);
+
+  return { checking, authenticated, logout, signin, signup };
 };
