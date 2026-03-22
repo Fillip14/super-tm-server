@@ -4,7 +4,7 @@ import {
   logoutRequest,
   signupRequest,
   fetchMe,
-  PlanInfo,
+  type PlanInfo,
 } from '../services/auth';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,6 @@ export const useAuth = () => {
 
   const active = (planInfo?.active ?? false) && (planInfo?.days_left ?? 0) > 0;
 
-  // forceLogout: limpa estado e redireciona para login sem chamar o backend
   const forceLogout = useCallback(() => {
     localStorage.removeItem('token');
     setAuthenticated(false);
@@ -51,10 +50,10 @@ export const useAuth = () => {
         }
 
         setAuthenticated(true);
-        const info = await fetchMe(token); // lança 'UNAUTHORIZED' se 401
+        const info = await fetchMe(token);
         setPlanInfo(info);
-      } catch (err: any) {
-        if (err?.message === 'UNAUTHORIZED') forceLogout();
+      } catch (err: unknown) {
+        if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
         else {
           localStorage.removeItem('token');
           setAuthenticated(false);
@@ -64,7 +63,7 @@ export const useAuth = () => {
       }
     };
     check();
-  }, []);
+  }, [forceLogout]);
 
   const signin = useCallback(async (email: string, password: string) => {
     const res = await signinRequest(email, password);
@@ -92,8 +91,8 @@ export const useAuth = () => {
     try {
       const info = await fetchMe(token);
       setPlanInfo(info);
-    } catch (err: any) {
-      if (err?.message === 'UNAUTHORIZED') forceLogout();
+    } catch (err: unknown) {
+      if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
     }
   }, [forceLogout]);
 
