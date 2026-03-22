@@ -3,11 +3,11 @@ import { Table, Column } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import { HttpStatus } from '../../../constants/api.constants';
 
-export const findUser = async (field: string, value: string) => {
+export const findUser = async (userID: string) => {
   const { data: userData, error: userError } = await supabase
     .from(Table.USERS)
     .select('*')
-    .eq(field, value)
+    .eq(Column.UUID, userID)
     .maybeSingle();
 
   if (userError)
@@ -20,8 +20,6 @@ export const createNewUser = async (): Promise<string> => {
   const { data: newUser, error: userInsertError } = await supabase
     .from(Table.USERS)
     .insert({
-      product: 'god',
-      active: true,
       online: false,
     })
     .select(Column.UUID)
@@ -33,7 +31,7 @@ export const createNewUser = async (): Promise<string> => {
   return newUser.uuid;
 };
 
-export const patchUser = async (field: string, value: string | boolean, userID: string) => {
+export const patchUser = async (field: string, value: string | boolean | null, userID: string) => {
   const { error: userError } = await supabase
     .from(Table.USERS)
     .update({ [field]: value })

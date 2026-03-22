@@ -1,18 +1,31 @@
-import { findUserService } from '../modules/users/services/user.service';
+import { findUserService, patchUserService } from '../modules/users/services/user.service';
 import { Column } from '../constants/database.constants';
 import { AppError } from '../errors/AppError';
 import { HttpStatus } from '../constants/api.constants';
 
-export const validateUser = async (user_id: string, client_type: string) => {
-  const userData = await findUserService(Column.UUID, user_id);
+export const validateUser = async (
+  userID: string,
+  clientType: string,
+  allowUserLogged: boolean = false,
+) => {
+  const userData = await findUserService(userID);
+  const dateNow = new Date().toISOString();
 
-  if (!userData.active)
-    throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED, {
-      suggestedAction: 'contact_support',
-    });
+  if (userData.expires_at < dateNow || userData.expires_at == null) {
+    patchUserService(Column.ACTIVE, false, userID);
+    patchUserService(Column.PRODUCT, null, userID);
+    userData.product = null;
+    userData.active = false;
+  } else {
+    patchUserService(Column.ACTIVE, true, userID);
+    userData.active = true;
+  }
 
-  if (client_type === 'desktop' && userData.online)
-    throw new AppError('Usuário já logado.', HttpStatus.CONFLICT);
+  if (clientType === 'desktop') {
+    if (!userData.active) throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED);
+    if (userData.online && !allowUserLogged)
+      throw new AppError('Usuário já logado.', HttpStatus.CONFLICT);
+  }
 
   return userData;
 };

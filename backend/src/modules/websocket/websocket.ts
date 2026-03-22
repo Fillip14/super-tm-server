@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
-import { findUserService, patchUserService } from '../users/services/user.service';
+import { patchUserService } from '../users/services/user.service';
 import { Column } from '../../constants/database.constants';
 import { validateUser } from '../../utils/validateUser';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -49,8 +49,9 @@ export const initWebSocket = (server: Server): void => {
 
     const activeCheck = setInterval(
       async () => {
-        const user = await findUserService(Column.UUID, userId);
-        if (!user.active) {
+        try {
+          await validateUser(userId, 'desktop', true);
+        } catch {
           ws.close(1008, 'Unauthorized');
         }
       },
