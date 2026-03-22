@@ -1,7 +1,5 @@
 export interface LogEntry {
   message: string;
-  level: string;
-  timestamp: string;
 }
 
 export interface BotStatus {
@@ -11,6 +9,8 @@ export interface BotStatus {
   hp: number | null;
   mp: number | null;
   screenshot: string | null;
+  cap: number | null;
+  amount_MP: number | null;
 }
 
 export interface WsMessage {

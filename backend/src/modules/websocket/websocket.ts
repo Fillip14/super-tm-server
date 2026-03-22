@@ -1,7 +1,9 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
-import { findUserService } from '../users/services/user.service';
+import { findUserService, patchUserService } from '../users/services/user.service';
+import { Column } from '../../constants/database.constants';
+import { validateUser } from '../../utils/validateUser';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import logger from '../../utils/log/logger';
 
@@ -36,7 +38,7 @@ const getUserIdFromRequest = (
 export const initWebSocket = (server: Server): void => {
   wss = new WebSocketServer({ server });
 
-  wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+  wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     const { userId, isDesktop } = getUserIdFromRequest(req);
 
     if (!userId) {
@@ -47,7 +49,7 @@ export const initWebSocket = (server: Server): void => {
 
     const activeCheck = setInterval(
       async () => {
-        const user = await findUserService(userId);
+        const user = await findUserService(Column.UUID, userId);
         if (!user.active) {
           ws.close(1008, 'Unauthorized');
         }
@@ -56,21 +58,27 @@ export const initWebSocket = (server: Server): void => {
     );
 
     if (isDesktop) {
+      try {
+        await validateUser(userId, 'desktop');
+      } catch {
+        ws.close(1008, 'Unauthorized');
+        return;
+      }
       botSockets.set(userId, ws);
+      patchUserService(Column.ONLINE, true, userId);
       logger.info(`Desktop app conectado: user_id=${userId}`);
 
       ws.on('message', (raw) => {
         try {
           const { type, data } = JSON.parse(raw.toString());
-          if (type === 'status') {
-            sendToClient(userId, { type: 'status', data });
-          }
+          sendToClient(userId, { type, data });
         } catch {}
       });
 
       ws.on('close', () => {
         clearInterval(activeCheck);
         botSockets.delete(userId);
+        patchUserService(Column.ONLINE, false, userId);
         logger.info(`Desktop app desconectado: user_id=${userId}`);
       });
     } else {

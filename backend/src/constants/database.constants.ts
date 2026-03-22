@@ -5,11 +5,12 @@ export enum Table {
 
 export enum Column {
   USER_ID = 'user_id',
-  PROVIDER = 'email',
+  EMAIL = 'email',
   PASSWORD_HASH = 'password_hash',
   ROLE = 'role',
   STATUS = 'status',
   UUID = 'uuid',
   PRODUCT = 'product',
   ACTIVE = 'active',
+  ONLINE = 'online',
 }

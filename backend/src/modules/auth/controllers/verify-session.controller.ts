@@ -5,8 +5,9 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 import { verifySessionService } from '../services/verify-session.service';
 
 export const verifySessionController = asyncHandler(async (req: Request, res: Response) => {
-  const { user_id, type } = res.locals.user;
-  const { active, product } = await verifySessionService(user_id, type);
+  const { user_id, type: user_type } = res.locals.user;
+  const client_type = req.headers['client-type'] as string;
+  const { active, product } = await verifySessionService(user_id, client_type);
 
   if (active) {
     logger.info('Sessão verificada com sucesso.');

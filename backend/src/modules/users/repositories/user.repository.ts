@@ -3,11 +3,11 @@ import { Table, Column } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import { HttpStatus } from '../../../constants/api.constants';
 
-export const findUser = async (uuid: string) => {
+export const findUser = async (field: string, value: string) => {
   const { data: userData, error: userError } = await supabase
     .from(Table.USERS)
     .select('*')
-    .eq(Column.UUID, uuid)
+    .eq(field, value)
     .maybeSingle();
 
   if (userError)
@@ -16,23 +16,22 @@ export const findUser = async (uuid: string) => {
   return userData;
 };
 
-// export const createNewUser = async (userData: SignUp): Promise<string> => {
-//   const { data: newUser, error: userInsertError } = await supabase
-//     .from(Table.USERS)
-//     .insert({
-//       type: userData.type,
-//       status: AccountStatus.ACTIVE,
-//       email: userData.email,
-//       document: userData.document,
-//     })
-//     .select(Column.UUID)
-//     .single();
+export const createNewUser = async (): Promise<string> => {
+  const { data: newUser, error: userInsertError } = await supabase
+    .from(Table.USERS)
+    .insert({
+      product: 'god',
+      active: true,
+      online: false,
+    })
+    .select(Column.UUID)
+    .single();
 
-//   if (userInsertError)
-//     throw new AppError('Erro ao cadastrar no users.', HttpStatus.INTERNAL_SERVER_ERROR);
+  if (userInsertError)
+    throw new AppError('Erro ao cadastrar no users.', HttpStatus.INTERNAL_SERVER_ERROR);
 
-//   return newUser.uuid;
-// };
+  return newUser.uuid;
+};
 
 export const patchUser = async (field: string, value: string | boolean, userID: string) => {
   const { error: userError } = await supabase

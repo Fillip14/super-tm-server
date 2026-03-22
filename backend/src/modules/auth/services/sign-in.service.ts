@@ -1,27 +1,21 @@
 import { HttpStatus } from '../../../constants/api.constants';
 // import { AccountStatus, Column } from '../../../constants/database.constants';
-// import { findAuthService } from './auth.service';
 import { AppError } from '../../../errors/AppError';
-import { findUserService } from '../../users/services/user.service';
+import { validateUser } from '../../../utils/validateUser';
 import { SignIn } from '../schemas/sign-in.schema';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { findAuth } from '../repositories/auth.repository';
+import { findAuthService } from './auth.service';
+import { Column } from '../../../constants/database.constants';
 
-export const signService = async (siginData: SignIn) => {
-  const authData = await findAuth(siginData);
-
+export const signService = async (siginData: SignIn, client_type: string) => {
+  const authData = await findAuthService(Column.EMAIL, siginData.email);
   if (!authData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
   if (!(await bcrypt.compare(siginData.password, authData.password_hash)))
     throw new AppError('Email ou senha inválidos.', HttpStatus.UNAUTHORIZED);
 
-  const userData = await findUserService(authData.user_id);
-
-  if (!userData.active)
-    throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED, {
-      suggestedAction: 'contact_support',
-    });
+  const userData = await validateUser(authData.user_id, client_type);
 
   const expiresAt = new Date(userData.expires_at).getTime();
   const expiresIn = Math.floor((expiresAt - Date.now()) / 1000);

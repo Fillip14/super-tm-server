@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/home';
 import { Login } from './pages/login';
+import { Signup } from './pages/signup';
 import { Status } from './pages/status';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -9,6 +10,7 @@ export const App = () => (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route
         path="/status"
         element={
