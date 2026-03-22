@@ -1,5 +1,5 @@
 import { Column } from '../../../constants/database.constants';
-import { findUser, patchUser } from '../repositories/user.repository';
+import { createNewUser, findUser, patchUser } from '../repositories/user.repository';
 
 export const findUserService = async (field: string, value: string) => {
   const userData = await findUser(field, value);
@@ -18,15 +18,15 @@ export const findUserService = async (field: string, value: string) => {
   return userData;
 };
 
-// export const createUserService = async (userData: SignUp) => {
-//   return await createNewUser(userData);
-// };
+export const createUserService = async () => {
+  return await createNewUser();
+};
 
-// export const patchUserService = async (email: string, userID: string) => {
-//   const userData = await patchUser(email, userID);
+export const patchUserService = async (field: string, value: string | boolean, user_id: string) => {
+  const userData = await patchUser(field, value, user_id);
 
-//   return userData;
-// };
+  return userData;
+};
 
 // export const deleteUserService = async (userID: string) => {
 //   return await deleteUser(userID);

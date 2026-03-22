@@ -1,9 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 import { IncomingMessage } from 'http';
-import { findUserService } from '../users/services/user.service';
+import { findUserService, patchUserService } from '../users/services/user.service';
 import { Column } from '../../constants/database.constants';
-import { patchUser } from '../users/repositories/user.repository';
 import { validateUser } from '../../utils/validateUser';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import logger from '../../utils/log/logger';
@@ -66,7 +65,7 @@ export const initWebSocket = (server: Server): void => {
         return;
       }
       botSockets.set(userId, ws);
-      patchUser(Column.ONLINE, true, userId);
+      patchUserService(Column.ONLINE, true, userId);
       logger.info(`Desktop app conectado: user_id=${userId}`);
 
       ws.on('message', (raw) => {
@@ -79,7 +78,7 @@ export const initWebSocket = (server: Server): void => {
       ws.on('close', () => {
         clearInterval(activeCheck);
         botSockets.delete(userId);
-        patchUser(Column.ONLINE, false, userId);
+        patchUserService(Column.ONLINE, false, userId);
         logger.info(`Desktop app desconectado: user_id=${userId}`);
       });
     } else {
