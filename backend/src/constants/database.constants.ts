@@ -13,4 +13,5 @@ export enum Column {
   PRODUCT = 'product',
   ACTIVE = 'active',
   ONLINE = 'online',
+  EXPIRES_AT = 'expires_at',
 }

@@ -13,7 +13,7 @@ export const Login = () => {
 
   useEffect(() => {
     if (!checking && authenticated) {
-      navigate('/status');
+      navigate('/dashboard');
     }
   }, [checking, authenticated, navigate]);
 
@@ -27,7 +27,7 @@ export const Login = () => {
     setLoading(true);
     try {
       const result = await signin(email, password);
-      if (result.ok) navigate('/status');
+      if (result.ok) navigate('/dashboard');
       else setError(result.message || 'Email ou senha inválidos.');
     } catch {
       setError('Sem conexão com o servidor.');

@@ -1,11 +1,38 @@
-import { verifySession, signinRequest, logoutRequest, signupRequest } from '../services/auth';
+import {
+  verifyToken,
+  signinRequest,
+  logoutRequest,
+  signupRequest,
+  fetchMe,
+  type PlanInfo,
+} from '../services/auth';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
   const [checking, setChecking] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
   const navigate = useNavigate();
+
+  const active = (planInfo?.active ?? false) && (planInfo?.days_left ?? 0) > 0;
+
+  const forceLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    setAuthenticated(false);
+    setPlanInfo(null);
+    navigate('/login');
+  }, [navigate]);
+
+  const logout = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await logoutRequest(token);
+    } catch {
+      /* ignora falha de rede */
+    }
+    forceLogout();
+  }, [forceLogout]);
 
   useEffect(() => {
     const check = async () => {
@@ -15,35 +42,42 @@ export const useAuth = () => {
         setChecking(false);
         return;
       }
-
       try {
-        setAuthenticated(await verifySession(token));
-      } catch {
-        localStorage.removeItem('token');
-        setAuthenticated(false);
+        const valid = await verifyToken(token);
+        if (!valid) {
+          forceLogout();
+          return;
+        }
+
+        setAuthenticated(true);
+        const info = await fetchMe(token);
+        setPlanInfo(info);
+      } catch (err: unknown) {
+        if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
+        else {
+          localStorage.removeItem('token');
+          setAuthenticated(false);
+        }
       } finally {
-        localStorage.removeItem('token');
         setChecking(false);
       }
     };
     check();
-  }, []);
-
-  const logout = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    try {
-      await logoutRequest(token);
-    } catch {
-      /* força logout local mesmo se falhar */
-    }
-    localStorage.removeItem('token');
-    setAuthenticated(false);
-    navigate('/');
-  }, [navigate]);
+  }, [forceLogout]);
 
   const signin = useCallback(async (email: string, password: string) => {
     const res = await signinRequest(email, password);
-    if (res.ok) localStorage.setItem('token', res.token);
+    if (res.ok) {
+      localStorage.setItem('token', res.token);
+      try {
+        const info = await fetchMe(res.token);
+        setPlanInfo(info);
+        setAuthenticated(true);
+      } catch {
+        localStorage.removeItem('token');
+        return { ok: false, message: 'Erro inesperado. Tente novamente.' };
+      }
+    }
     return res;
   }, []);
 
@@ -51,5 +85,16 @@ export const useAuth = () => {
     return await signupRequest(email, password);
   }, []);
 
-  return { checking, authenticated, logout, signin, signup };
+  const refreshPlan = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const info = await fetchMe(token);
+      setPlanInfo(info);
+    } catch (err: unknown) {
+      if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
+    }
+  }, [forceLogout]);
+
+  return { checking, authenticated, active, planInfo, logout, signin, signup, refreshPlan };
 };
