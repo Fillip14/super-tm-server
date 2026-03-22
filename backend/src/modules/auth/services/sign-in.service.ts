@@ -1,15 +1,15 @@
 import { HttpStatus } from '../../../constants/api.constants';
 // import { AccountStatus, Column } from '../../../constants/database.constants';
-// import { findAuthService } from './auth.service';
 import { AppError } from '../../../errors/AppError';
 import { validateUser } from '../../../utils/validateUser';
 import { SignIn } from '../schemas/sign-in.schema';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { findAuth } from '../repositories/auth.repository';
+import { findAuthService } from './auth.service';
+import { Column } from '../../../constants/database.constants';
 
 export const signService = async (siginData: SignIn, client_type: string) => {
-  const authData = await findAuth(siginData);
+  const authData = await findAuthService(Column.EMAIL, siginData.email);
   if (!authData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
   if (!(await bcrypt.compare(siginData.password, authData.password_hash)))

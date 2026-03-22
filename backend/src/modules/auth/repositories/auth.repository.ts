@@ -3,13 +3,12 @@ import { supabase } from '../../../database/supabaseClient';
 import { Column, Table } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import { HttpStatus } from '../../../constants/api.constants';
-import { SignIn } from '../schemas/sign-in.schema';
 
-export const findAuth = async (itemToSearch: SignIn) => {
+export const findAuth = async (field: string, value: string) => {
   const { data: authData, error: authError } = await supabase
     .from(Table.AUTH)
     .select(`${Column.USER_ID}, ${Column.EMAIL}, ${Column.PASSWORD_HASH}, ${Column.ROLE}`)
-    .eq(Column.EMAIL, itemToSearch.email)
+    .eq(field, value)
     .maybeSingle();
 
   if (authError)
