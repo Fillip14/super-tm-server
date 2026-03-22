@@ -69,7 +69,7 @@ export const Home = () => {
         {/* Buttons */}
         <div className="home-actions">
           {checking ? null : authenticated ? (
-            <button className="btn-signin" onClick={() => navigate('/status')}>
+            <button className="btn-signin" onClick={() => navigate('/dashboard')}>
               <span className="btn-text">Dashboard</span>
               <span className="btn-arrow">→</span>
             </button>
