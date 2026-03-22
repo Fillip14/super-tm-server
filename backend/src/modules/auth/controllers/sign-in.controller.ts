@@ -6,10 +6,9 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 
 export const loginController = asyncHandler(async (req: Request, res: Response) => {
   const userData = res.locals.validated;
-  const isDesktop = req.headers['client-type'] === 'desktop';
-  const isWeb = req.headers['client-type'] === 'web';
+  const client_type = (req.headers['client-type'] as string) ?? '';
 
-  const { authToken, product } = await signService(userData);
+  const { authToken, product } = await signService(userData, client_type);
 
   logger.info('Login realizado com sucesso.');
   res.status(HttpStatus.OK).json({
