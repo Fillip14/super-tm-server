@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { activatePlanRequest } from '../../services/auth';
 import { useAuth } from '../../hooks/useAuth';
 import './payment.css';
 
 export const Payment = () => {
   const navigate = useNavigate();
-  const { refreshPlan } = useAuth();
+  const { activatePlan } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -21,18 +20,13 @@ export const Payment = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await activatePlanRequest(token);
-      if (res.ok) {
-        await refreshPlan();
+      const res = await activatePlan(token);
+      if (res) {
         setSuccess(true);
       } else {
-        setError(res.message || 'Erro ao ativar plano.');
+        setError('Erro ao ativar plano.');
       }
-    } catch (err: any) {
-      if (err?.message === 'UNAUTHORIZED') {
-        navigate('/login');
-        return;
-      }
+    } catch {
       setError('Sem conexão com o servidor.');
     } finally {
       setLoading(false);
