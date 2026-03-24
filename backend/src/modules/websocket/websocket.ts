@@ -3,7 +3,7 @@ import { Server } from 'http';
 import { IncomingMessage } from 'http';
 import { patchUserService } from '../users/services/user.service';
 import { Column } from '../../constants/database.constants';
-import { validateUser } from '../../utils/validateUser';
+import { validateConnection } from './utils/validatePlan';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import logger from '../../utils/log/logger';
 
@@ -29,7 +29,7 @@ const getUserIdFromRequest = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-    if (decoded.user_id) return { userId: decoded.user_id, isDesktop };
+    if (decoded.userId) return { userId: decoded.userId, isDesktop };
   } catch {}
 
   return { userId: null, isDesktop: false };
@@ -43,16 +43,31 @@ export const initWebSocket = (server: Server): void => {
 
     if (!userId) {
       logger.warn('WebSocket recusado: token inválido ou ausente');
-      ws.close(1008, 'Unauthorized');
+      ws.close(1008, 'invalid_token');
       return;
     }
 
-    const activeCheck = setInterval(
+    ws.on('pong', () => {
+      (ws as any).isAlive = true;
+    });
+
+    const connectionCheck = setInterval(
       async () => {
+        // heartbeat
+        if ((ws as any).isAlive === false) {
+          logger.info(`Conexão perdida detectada: userId=${userId}`);
+          ws.terminate();
+          return;
+        }
+
+        (ws as any).isAlive = false;
+        ws.ping();
+
+        // valida plano
         try {
-          await validateUser(userId, 'desktop', true);
+          await validateConnection(userId, false);
         } catch {
-          ws.close(1008, 'Unauthorized');
+          ws.close(4002, 'plan_expired');
         }
       },
       15 * 60 * 1000,
@@ -60,14 +75,14 @@ export const initWebSocket = (server: Server): void => {
 
     if (isDesktop) {
       try {
-        await validateUser(userId, 'desktop');
+        await validateConnection(userId, true);
       } catch {
-        ws.close(1008, 'Unauthorized');
+        ws.close(4001, 'duplicate_login');
         return;
       }
       botSockets.set(userId, ws);
       patchUserService(Column.ONLINE, true, userId);
-      logger.info(`Desktop app conectado: user_id=${userId}`);
+      logger.info(`Desktop app conectado: userId=${userId}`);
 
       ws.on('message', (raw) => {
         try {
@@ -77,14 +92,14 @@ export const initWebSocket = (server: Server): void => {
       });
 
       ws.on('close', () => {
-        clearInterval(activeCheck);
+        clearInterval(connectionCheck);
         botSockets.delete(userId);
         patchUserService(Column.ONLINE, false, userId);
-        logger.info(`Desktop app desconectado: user_id=${userId}`);
+        logger.info(`Desktop app desconectado: userId=${userId}`);
       });
     } else {
       clientSockets.set(userId, ws);
-      logger.info(`Web app conectado: user_id=${userId}`);
+      logger.info(`Web app conectado: userId=${userId}`);
 
       ws.on('message', (raw) => {
         try {
@@ -94,15 +109,15 @@ export const initWebSocket = (server: Server): void => {
       });
 
       ws.on('close', () => {
-        clearInterval(activeCheck);
+        clearInterval(connectionCheck);
         clientSockets.delete(userId);
-        logger.info(`Web app desconectado: user_id=${userId}`);
+        logger.info(`Web app desconectado: userId=${userId}`);
       });
     }
   });
 };
 
-// manda pro browser do user_id específico
+// manda pro browser do userId específico
 function sendToClient(userId: string, data: object): void {
   const client = clientSockets.get(userId);
   if (client?.readyState === WebSocket.OPEN) {
@@ -110,7 +125,7 @@ function sendToClient(userId: string, data: object): void {
   }
 }
 
-// manda pro desktop do user_id específico
+// manda pro desktop do userId específico
 function sendToDesktop(userId: string, data: object): void {
   const bot = botSockets.get(userId);
   if (bot?.readyState === WebSocket.OPEN) {
