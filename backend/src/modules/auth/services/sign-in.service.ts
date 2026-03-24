@@ -1,5 +1,4 @@
 import { HttpStatus } from '../../../constants/api.constants';
-// import { AccountStatus, Column } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import { validateUser } from '../../../utils/validateUser';
 import { SignIn } from '../schemas/sign-in.schema';
@@ -7,24 +6,26 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { findAuthService } from './auth.service';
 import { Column } from '../../../constants/database.constants';
+import { findUserService } from '../../users/services/user.service';
 
-export const signService = async (siginData: SignIn, client_type: string) => {
+export const signService = async (siginData: SignIn, clientType: string) => {
   const authData = await findAuthService(Column.EMAIL, siginData.email);
   if (!authData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
   if (!(await bcrypt.compare(siginData.password, authData.password_hash)))
     throw new AppError('Email ou senha inválidos.', HttpStatus.UNAUTHORIZED);
 
-  const userData = await validateUser(authData.user_id, client_type);
+  const userData = await findUserService(authData.user_id);
 
-  const expiresAt = new Date(userData.expires_at).getTime();
-  const expiresIn = Math.floor((expiresAt - Date.now()) / 1000);
+  if (!userData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
+
+  await validateUser(userData, clientType);
 
   return {
     authToken: jwt.sign(
-      { user_id: authData.user_id, type: authData.role },
+      { userId: authData.user_id, userType: authData.role },
       process.env.JWT_SECRET as string,
-      { expiresIn },
+      { expiresIn: '7d' },
     ),
     product: userData.product,
   };

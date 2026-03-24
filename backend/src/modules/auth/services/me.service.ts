@@ -5,7 +5,7 @@ import { AppError } from '../../../errors/AppError';
 export const meService = async (userID: string) => {
   const userData = await findUserService(userID);
 
-  if (!userData) throw new AppError('Usuário não encontrado.', HttpStatus.UNAUTHORIZED);
+  if (!userData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
   let daysLeft = 0;
   if (userData.expires_at) {

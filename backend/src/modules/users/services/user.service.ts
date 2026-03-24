@@ -11,9 +11,9 @@ export const createUserService = async () => {
 export const patchUserService = async (
   field: string,
   value: string | boolean | null,
-  user_id: string,
+  userId: string,
 ) => {
-  const userData = await patchUser(field, value, user_id);
+  const userData = await patchUser(field, value, userId);
 
   return userData;
 };

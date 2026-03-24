@@ -67,7 +67,7 @@ export const Status = () => {
           {/* Programa */}
           <div className={`stat-card${status?.pos_char ? ' active-glow' : ''}`}>
             <div className="stat-card-header">
-              <span className="stat-card-label">Programa</span>
+              <span className="stat-card-label">Program</span>
               <span className="stat-card-icon">⚙️</span>
             </div>
             <div>
@@ -91,7 +91,7 @@ export const Status = () => {
           {/* Heal */}
           <div className={`stat-card${status?.heal ? ' active-glow' : ''}`}>
             <div className="stat-card-header">
-              <span className="stat-card-label">Healler</span>
+              <span className="stat-card-label">Healer</span>
               <span className="stat-card-icon">💊</span>
             </div>
             <div>
@@ -149,6 +149,27 @@ export const Status = () => {
             </div>
             <span className="stat-card-sub">Poções de mana</span>
           </div>
+
+          {/* Minimap */}
+          {status?.minimap && (
+            <div className="stat-card" style={{ gridColumn: 'span 2' }}>
+              <div className="stat-card-header">
+                <span className="stat-card-label">Minimap</span>
+                <span className="stat-card-icon">🗺️</span>
+              </div>
+              <img
+                src={`data:image/jpeg;base64,${status.minimap}`}
+                alt="minimap"
+                style={{
+                  imageRendering: 'pixelated',
+                  border: '1px solid rgba(0,229,255,0.2)',
+                  borderRadius: 6,
+                  width: '100%',
+                  maxWidth: 200,
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Controls */}
@@ -161,7 +182,7 @@ export const Status = () => {
               {/* Programa */}
               <div className="control-group">
                 <div className="control-group-label">
-                  <span className="control-group-name">Programa</span>
+                  <span className="control-group-name">Program</span>
                   <span className="control-group-desc">Captura de tela e posição do char</span>
                 </div>
                 <div className="control-btn-group">
@@ -203,7 +224,7 @@ export const Status = () => {
               {/* Heal */}
               <div className="control-group">
                 <div className="control-group-label">
-                  <span className="control-group-name">Healler</span>
+                  <span className="control-group-name">Healer</span>
                   <span className="control-group-desc">Cura automática de HP e MP</span>
                 </div>
                 <div className="control-btn-group">

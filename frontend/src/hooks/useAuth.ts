@@ -1,9 +1,10 @@
 import {
-  verifyToken,
+  validateSessionRequest,
   signinRequest,
   logoutRequest,
   signupRequest,
   fetchMe,
+  activatePlanRequest,
   type PlanInfo,
 } from '../services/auth';
 import { useCallback, useEffect, useState } from 'react';
@@ -15,13 +16,11 @@ export const useAuth = () => {
   const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
   const navigate = useNavigate();
 
-  const active = (planInfo?.active ?? false) && (planInfo?.days_left ?? 0) > 0;
-
   const forceLogout = useCallback(() => {
     localStorage.removeItem('token');
     setAuthenticated(false);
     setPlanInfo(null);
-    navigate('/login');
+    navigate('/');
   }, [navigate]);
 
   const logout = useCallback(async () => {
@@ -42,22 +41,16 @@ export const useAuth = () => {
         setChecking(false);
         return;
       }
-      try {
-        const valid = await verifyToken(token);
-        if (!valid) {
-          forceLogout();
-          return;
-        }
 
+      let info = null;
+      try {
+        await validateSessionRequest(token);
         setAuthenticated(true);
-        const info = await fetchMe(token);
+        info = await fetchMe(token);
         setPlanInfo(info);
       } catch (err: unknown) {
-        if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
-        else {
-          localStorage.removeItem('token');
-          setAuthenticated(false);
-        }
+        const e = err as { status?: number };
+        if (e.status === 401) forceLogout();
       } finally {
         setChecking(false);
       }
@@ -69,14 +62,7 @@ export const useAuth = () => {
     const res = await signinRequest(email, password);
     if (res.ok) {
       localStorage.setItem('token', res.token);
-      try {
-        const info = await fetchMe(res.token);
-        setPlanInfo(info);
-        setAuthenticated(true);
-      } catch {
-        localStorage.removeItem('token');
-        return { ok: false, message: 'Erro inesperado. Tente novamente.' };
-      }
+      setAuthenticated(true);
     }
     return res;
   }, []);
@@ -85,16 +71,14 @@ export const useAuth = () => {
     return await signupRequest(email, password);
   }, []);
 
-  const refreshPlan = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+  const activatePlan = useCallback(async (token: string) => {
     try {
-      const info = await fetchMe(token);
-      setPlanInfo(info);
-    } catch (err: unknown) {
-      if ((err as Error)?.message === 'UNAUTHORIZED') forceLogout();
+      const res = await activatePlanRequest(token);
+      return res;
+    } catch {
+      return null;
     }
-  }, [forceLogout]);
+  }, []);
 
-  return { checking, authenticated, active, planInfo, logout, signin, signup, refreshPlan };
+  return { checking, authenticated, planInfo, signin, signup, logout, activatePlan };
 };

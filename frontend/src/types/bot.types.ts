@@ -8,7 +8,7 @@ export interface BotStatus {
   heal: boolean;
   hp: number | null;
   mp: number | null;
-  screenshot: string | null;
+  minimap: string | null;
   cap: number | null;
   amount_MP: number | null;
 }

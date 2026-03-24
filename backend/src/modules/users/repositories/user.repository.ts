@@ -35,7 +35,8 @@ export const patchUser = async (field: string, value: string | boolean | null, u
   const { error: userError } = await supabase
     .from(Table.USERS)
     .update({ [field]: value })
-    .eq(Column.UUID, userID);
+    .eq(Column.UUID, userID)
+    .single();
 
   if (userError) throw new AppError('Erro ao atualizar usuário.', HttpStatus.INTERNAL_SERVER_ERROR);
 

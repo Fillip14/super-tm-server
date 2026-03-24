@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { HttpStatus } from '../constants/api.constants';
 import logger from '../utils/log/logger';
 
-export const authMiddleware = (requiredType?: string, allowExpired = false) => {
+export const authMiddleware = (requiredType?: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.auth || req.headers['authorization']?.split(' ')[1];
 
@@ -14,22 +14,18 @@ export const authMiddleware = (requiredType?: string, allowExpired = false) => {
     }
 
     try {
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET as string,
-        allowExpired ? { ignoreExpiration: true } : {},
-      ) as JwtPayload;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
       if (
         (typeof requiredType === 'string' &&
-          decoded.type.toUpperCase() !== requiredType.toUpperCase()) ||
-        !['USER', 'ADMIN'].includes(decoded.type.toUpperCase())
+          decoded.userType.toUpperCase() !== requiredType.toUpperCase()) ||
+        !['USER', 'ADMIN'].includes(decoded.userType.toUpperCase())
       ) {
         logger.warn(`Token inválido. Token: ${JSON.stringify(decoded)}. Required: ${requiredType}`);
         res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Não autorizado.' });
         return;
       }
-      res.locals.user = { user_id: decoded.user_id, type: decoded.type };
+      res.locals.user = { userId: decoded.userId, userType: decoded.userType };
       next();
     } catch (error) {
       logger.warn(`Token inválido. Token: ${token}`);

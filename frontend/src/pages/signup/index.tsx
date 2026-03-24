@@ -5,6 +5,15 @@ import './signup.css';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+const validatePassword = (password: string): string | null => {
+  if (password.length < 6) return 'A senha deve ter no mínimo 8 caracteres';
+  if (!/[A-Z]/.test(password)) return 'A senha deve ter pelo menos uma letra maiúscula';
+  if (!/[a-z]/.test(password)) return 'A senha deve ter pelo menos uma letra minúscula';
+  if (!/[\W_]/.test(password)) return 'A senha deve ter pelo menos um caractere especial';
+  if (!/\d/.test(password)) return 'A senha deve ter pelo menos um número';
+  return null;
+};
+
 export const Signup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -12,7 +21,6 @@ export const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<{
-    // document?: string;
     email?: string;
     password?: string;
     general?: string;
@@ -22,7 +30,8 @@ export const Signup = () => {
   const validate = () => {
     const newErrors: typeof errors = {};
     if (!isValidEmail(email)) newErrors.email = 'Email inválido';
-    if (password.length < 6) newErrors.password = 'Senha deve ter ao menos 6 caracteres';
+    const passwordError = validatePassword(password);
+    if (passwordError) newErrors.password = passwordError;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -36,7 +45,7 @@ export const Signup = () => {
       if (result.ok) {
         setSuccess(true);
       } else {
-        setLoading(false); // para o spinner antes de setar o erro
+        setLoading(false);
         setErrors({ general: result.message || 'Erro ao criar conta.' });
       }
     } catch {
@@ -98,9 +107,7 @@ export const Signup = () => {
           </div>
 
           <div className="field-group">
-            <label className="field-label">
-              Senha {errors.password && <span className="field-error">* {errors.password}</span>}
-            </label>
+            <label className="field-label">Senha</label>
             <input
               className={`field-input ${errors.password ? 'field-input--error' : ''}`}
               type="password"
@@ -109,6 +116,10 @@ export const Signup = () => {
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
             />
+            <p className={`field-hint${errors.password ? ' field-hint--error' : ''}`}>
+              As senhas devem ter pelo menos 6 caracteres e incluir uma combinação de letras
+              maiúsculas, letras minúsculas, números e símbolos.
+            </p>
           </div>
 
           {errors.general && (
