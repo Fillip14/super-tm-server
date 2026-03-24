@@ -50,7 +50,7 @@ export const useAuth = () => {
         setPlanInfo(info);
       } catch (err: unknown) {
         const e = err as { status?: number };
-        if (e.status === 401) forceLogout();
+        if (e.status === 401 || e.status === 404) forceLogout();
       } finally {
         setChecking(false);
       }
