@@ -30,7 +30,9 @@ const getUserIdFromRequest = (
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
     if (decoded.userId) return { userId: decoded.userId, isDesktop };
-  } catch {}
+  } catch (err) {
+    logger.error('Erro no token no websocket', err);
+  }
 
   return { userId: null, isDesktop: false };
 };
@@ -46,6 +48,8 @@ export const initWebSocket = (server: Server): void => {
       ws.close(1008, 'invalid_token');
       return;
     }
+
+    (ws as any).isAlive = true;
 
     ws.on('pong', () => {
       (ws as any).isAlive = true;
@@ -81,20 +85,30 @@ export const initWebSocket = (server: Server): void => {
         return;
       }
       botSockets.set(userId, ws);
-      patchUserService(Column.ONLINE, true, userId);
+      try {
+        await patchUserService(Column.ONLINE, true, userId);
+      } catch (err) {
+        logger.error('Erro ao atualizar status online', err);
+      }
       logger.info(`Desktop app conectado: userId=${userId}`);
 
       ws.on('message', (raw) => {
         try {
           const { type, data } = JSON.parse(raw.toString());
           sendToClient(userId, { type, data });
-        } catch {}
+        } catch (err) {
+          logger.error('Erro processando mensagem websocket do desktop', err);
+        }
       });
 
-      ws.on('close', () => {
+      ws.on('close', async () => {
         clearInterval(connectionCheck);
         botSockets.delete(userId);
-        patchUserService(Column.ONLINE, false, userId);
+        try {
+          await patchUserService(Column.ONLINE, false, userId);
+        } catch (err) {
+          logger.error('Erro ao atualizar status online', err);
+        }
         logger.info(`Desktop app desconectado: userId=${userId}`);
       });
     } else {
@@ -105,7 +119,9 @@ export const initWebSocket = (server: Server): void => {
         try {
           const { category, action } = JSON.parse(raw.toString());
           sendToDesktop(userId, { type: 'action', category, action });
-        } catch {}
+        } catch (err) {
+          logger.error('Erro processando mensagem websocket do web', err);
+        }
       });
 
       ws.on('close', () => {
@@ -121,7 +137,11 @@ export const initWebSocket = (server: Server): void => {
 function sendToClient(userId: string, data: object): void {
   const client = clientSockets.get(userId);
   if (client?.readyState === WebSocket.OPEN) {
-    client.send(JSON.stringify(data));
+    try {
+      client.send(JSON.stringify(data));
+    } catch (err) {
+      logger.error('Erro ao enviar mensagem para o web', err);
+    }
   }
 }
 
@@ -129,6 +149,10 @@ function sendToClient(userId: string, data: object): void {
 function sendToDesktop(userId: string, data: object): void {
   const bot = botSockets.get(userId);
   if (bot?.readyState === WebSocket.OPEN) {
-    bot.send(JSON.stringify(data));
+    try {
+      bot.send(JSON.stringify(data));
+    } catch (err) {
+      logger.error('Erro ao enviar mensagem para o desktop', err);
+    }
   }
 }
