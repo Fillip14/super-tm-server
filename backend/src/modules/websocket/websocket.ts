@@ -49,17 +49,17 @@ export const initWebSocket = (server: Server): void => {
       return;
     }
 
-    if (botSockets.has(userId)) {
-      try {
-        await validateUser(userId, 'desktop', true);
-      } catch {
-        ws.send(JSON.stringify({ error: 'duplicate_login' }));
-        ws.close();
-        return;
-      }
-    }
-
     if (isDesktop) {
+      if (botSockets.has(userId)) {
+        try {
+          await validateUser(userId, 'desktop', true);
+        } catch {
+          ws.send(JSON.stringify({ error: 'duplicate_login' }));
+          ws.close();
+          return;
+        }
+      }
+
       botSockets.set(userId, ws);
 
       (ws as any).isAlive = true;
