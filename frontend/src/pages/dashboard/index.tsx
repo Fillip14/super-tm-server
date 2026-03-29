@@ -161,7 +161,7 @@ export const Dashboard = () => {
             <div>
               <h3 className="action-card-title">Controle do Bot</h3>
               <p className="action-card-desc">
-                Monitore e controle o bot em tempo real. Inicie hunts, healler e muito mais.
+                Monitore e controle o bot em tempo real. Inicie hunts, healer e muito mais.
               </p>
             </div>
             <span className="action-card-arrow">→</span>

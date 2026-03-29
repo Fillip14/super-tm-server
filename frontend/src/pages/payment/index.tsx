@@ -83,7 +83,7 @@ export const Payment = () => {
               </li>
               <li>
                 <span className="check">✓</span>
-                Healler automático com hotkeys
+                Healer automático com hotkeys
               </li>
               <li>
                 <span className="check">✓</span>

@@ -7,7 +7,7 @@ export const validateSessionService = async (userId: string, clientType: string)
   const userData = await findUserService(userId);
   if (!userData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
-  await validateUser(userData, clientType);
+  await validateUser(userId, clientType, false);
 
   return userData.product;
 };

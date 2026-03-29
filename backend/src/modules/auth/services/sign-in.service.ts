@@ -19,7 +19,7 @@ export const signService = async (siginData: SignIn, clientType: string) => {
 
   if (!userData) throw new AppError('Usuário não encontrado.', HttpStatus.NOT_FOUND);
 
-  await validateUser(userData, clientType);
+  await validateUser(authData.user_id, clientType, false);
 
   return {
     authToken: jwt.sign(
