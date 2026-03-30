@@ -60,29 +60,31 @@ export const initWebSocket = (server: Server): void => {
         }
       }
 
-      botSockets.set(userId, ws);
-
-      (ws as any).isAlive = true;
-
-      const connectionCheck = setInterval(
+      const planCheck = setInterval(
         async () => {
-          if ((ws as any).isAlive === false) {
-            logger.info(`Conexão perdida detectada: userId=${userId}`);
-            ws.terminate();
-            return;
-          }
-
           try {
             await validateUser(userId, 'desktop', false);
           } catch {
             sendToDesktop(userId, { error: 'plan_expired' });
           }
-
-          (ws as any).isAlive = false;
-          ws.ping();
         },
         15 * 60 * 1000,
       );
+
+      botSockets.set(userId, ws);
+
+      (ws as any).isAlive = true;
+
+      const connectionCheck = setInterval(async () => {
+        if ((ws as any).isAlive === false) {
+          logger.info(`Conexão perdida detectada: userId=${userId}`);
+          ws.terminate();
+          return;
+        }
+
+        (ws as any).isAlive = false;
+        ws.ping();
+      }, 30 * 1000);
 
       try {
         await patchUserService(Column.ONLINE, true, userId);
@@ -105,6 +107,7 @@ export const initWebSocket = (server: Server): void => {
       });
 
       ws.on('close', async () => {
+        clearInterval(planCheck);
         clearInterval(connectionCheck);
         botSockets.delete(userId);
         try {
