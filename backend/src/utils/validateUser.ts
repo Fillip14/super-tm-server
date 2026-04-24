@@ -17,11 +17,12 @@ export const validateUser = async (userID: any, clientType: string, isLogged = f
     userData.active = true;
   }
 
-  if (clientType === 'desktop')
+  if (clientType === 'desktop') {
     if (isLogged && userData.online) {
       throw new AppError('Usuário já logado.', HttpStatus.CONFLICT);
     }
-  if (!userData.active) throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED);
+    if (!userData.active) throw new AppError('Plano expirado.', HttpStatus.UNAUTHORIZED);
+  }
 
   return;
 };
