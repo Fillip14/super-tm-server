@@ -446,13 +446,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s;
-}
-
-.logs-header:hover {
-  background: rgba(255, 255, 255, 0.02);
 }
 
 .logs-header-left {
@@ -475,26 +468,6 @@
   border: 1px solid var(--border);
   border-radius: 100px;
   padding: 2px 8px;
-}
-
-.logs-chevron {
-  font-size: 12px;
-  color: var(--text-muted);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logs-chevron.open {
-  transform: rotate(180deg);
-}
-
-.logs-body {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logs-body.open {
-  max-height: 320px;
 }
 
 .logs-inner {

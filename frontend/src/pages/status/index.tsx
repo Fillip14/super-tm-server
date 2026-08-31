@@ -1,4 +1,3 @@
-// import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -25,7 +24,6 @@ export const Status = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { status, logs, sendAction } = useWebSocket();
-  // const [logsOpen, setLogsOpen] = useState(false);
 
   const botConnected = status !== null;
 
