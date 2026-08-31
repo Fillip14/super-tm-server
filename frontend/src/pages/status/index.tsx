@@ -264,6 +264,8 @@ export const Status = () => {
                 logs.map((log, i) => (
                   <div key={i} className="log-entry">
                     <span className="log-index">{logs.length - i}</span>
+                    <span className="log-time">{log.time}</span>
+                    <span className="log-type">{log.type}</span>
                     <span className="log-msg">{log.message}</span>
                   </div>
                 ))
