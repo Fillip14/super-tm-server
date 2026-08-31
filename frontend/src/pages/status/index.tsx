@@ -236,6 +236,24 @@ export const Status = () => {
                   </button>
                 </div>
               </div>
+
+              <div className="control-divider" />
+
+              {/* Reopen */}
+              <div className="control-group">
+                <div className="control-group-label">
+                  <span className="control-group-name">Reopen tibia</span>
+                  <span className="control-group-desc">Reabre a janela do tibia</span>
+                </div>
+                <div className="control-btn-group">
+                  <button
+                    className="btn-control start"
+                    onClick={() => sendAction('client', 'reopen')}
+                  >
+                    ▶ Reabrir
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
