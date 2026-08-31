@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -25,7 +25,7 @@ export const Status = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { status, logs, sendAction } = useWebSocket();
-  const [logsOpen, setLogsOpen] = useState(false);
+  // const [logsOpen, setLogsOpen] = useState(false);
 
   const botConnected = status !== null;
 
@@ -266,29 +266,26 @@ export const Status = () => {
 
         {/* Logs — collapsible */}
         <div className="logs-section">
-          <div className="logs-header" onClick={() => setLogsOpen((v) => !v)}>
+          <div className="logs-header">
             <div className="logs-header-left">
               <span className="logs-header-title">Logs</span>
               {logs.length > 0 && <span className="logs-count">{logs.length}</span>}
             </div>
-            <span className={`logs-chevron${logsOpen ? ' open' : ''}`}>▼</span>
           </div>
 
-          <div className={`logs-body${logsOpen ? ' open' : ''}`}>
-            <div className="logs-inner">
-              {logs.length === 0 ? (
-                <span className="logs-empty">Nenhum log registrado</span>
-              ) : (
-                logs.map((log, i) => (
-                  <div key={i} className="log-entry">
-                    <span className="log-index">{logs.length - i}</span>
-                    <span className="log-time">{log.time}</span>
-                    <span className="log-type">{log.type}</span>
-                    <span className="log-msg">{log.message}</span>
-                  </div>
-                ))
-              )}
-            </div>
+          <div className="logs-inner">
+            {logs.length === 0 ? (
+              <span className="logs-empty">Nenhum log registrado</span>
+            ) : (
+              logs.map((log, i) => (
+                <div key={i} className="log-entry">
+                  <span className="log-index">{logs.length - i}</span>
+                  <span className="log-time">{log.time}</span>
+                  <span className="log-type">{log.type}</span>
+                  <span className="log-msg">{log.message}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </main>
