@@ -40,6 +40,8 @@ const getUserIdFromRequest = (
 export const initWebSocket = (server: Server): void => {
   wss = new WebSocketServer({ server });
 
+  wss.on('error', (err) => logger.error('Erro no WebSocketServer', err));
+
   wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     const { userId, isDesktop } = getUserIdFromRequest(req);
 
@@ -93,9 +95,7 @@ export const initWebSocket = (server: Server): void => {
       }
       logger.info(`Desktop app conectado: userId=${userId}`);
 
-      ws.on('pong', () => {
-        (ws as any).isAlive = true;
-      });
+      ws.on('pong', () => ((ws as any).isAlive = true));
 
       ws.on('message', (raw) => {
         try {
@@ -106,10 +106,12 @@ export const initWebSocket = (server: Server): void => {
         }
       });
 
+      ws.on('error', (err) => logger.error(`Erro no websocket do desktop: userId=${userId}`, err));
+
       ws.on('close', async () => {
         clearInterval(planCheck);
         clearInterval(connectionCheck);
-        botSockets.delete(userId);
+        if (botSockets.get(userId) === ws) botSockets.delete(userId);
         try {
           await patchUserService(Column.ONLINE, false, userId);
         } catch (err) {
@@ -118,8 +120,29 @@ export const initWebSocket = (server: Server): void => {
         logger.info(`Desktop app desconectado: userId=${userId}`);
       });
     } else {
+      const existing = clientSockets.get(userId);
+      if (existing && existing !== ws) {
+        logger.info(`Fechando conexão web antiga: userId=${userId}`);
+        existing.terminate();
+      }
+
       clientSockets.set(userId, ws);
       logger.info(`Web app conectado: userId=${userId}`);
+
+      (ws as any).isAlive = true;
+
+      const connectionCheck = setInterval(() => {
+        if ((ws as any).isAlive === false) {
+          logger.info(`Conexão web perdida detectada: userId=${userId}`);
+          ws.terminate();
+          return;
+        }
+
+        (ws as any).isAlive = false;
+        ws.ping();
+      }, 30 * 1000);
+
+      ws.on('pong', () => ((ws as any).isAlive = true));
 
       ws.on('message', (raw) => {
         try {
@@ -130,8 +153,11 @@ export const initWebSocket = (server: Server): void => {
         }
       });
 
+      ws.on('error', (err) => logger.error(`Erro no websocket do web: userId=${userId}`, err));
+
       ws.on('close', () => {
-        clientSockets.delete(userId);
+        clearInterval(connectionCheck);
+        if (clientSockets.get(userId) === ws) clientSockets.delete(userId);
         logger.info(`Web app desconectado: userId=${userId}`);
       });
     }
