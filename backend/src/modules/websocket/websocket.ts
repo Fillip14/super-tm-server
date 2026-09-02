@@ -6,6 +6,7 @@ import { Column } from '../../constants/database.constants';
 import { validateUser } from '../../utils/validateUser';
 import { AppError } from '../../errors/AppError';
 import { HttpStatus } from '../../constants/api.constants';
+import { env } from '../../config/env';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import logger from '../../utils/log/logger';
 
@@ -36,7 +37,7 @@ const getUserIdFromRequest = (
   if (!token) return { userId: null, isDesktop: false };
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
     if (decoded.userId) return { userId: decoded.userId, isDesktop };
   } catch (err) {
     logger.error('Erro no token no websocket', err);

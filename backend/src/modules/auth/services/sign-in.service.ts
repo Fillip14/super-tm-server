@@ -1,4 +1,5 @@
 import { HttpStatus } from '../../../constants/api.constants';
+import { env } from '../../../config/env';
 import { AppError } from '../../../errors/AppError';
 import { validateUser } from '../../../utils/validateUser';
 import { SignIn } from '../schemas/sign-in.schema';
@@ -24,7 +25,7 @@ export const signService = async (siginData: SignIn, clientType: string) => {
   return {
     authToken: jwt.sign(
       { userId: authData.user_id, userType: authData.role },
-      process.env.JWT_SECRET as string,
+      env.JWT_SECRET,
       { expiresIn: '7d' },
     ),
     product: userData.product,
