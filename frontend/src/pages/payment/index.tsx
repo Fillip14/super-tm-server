@@ -47,7 +47,7 @@ export const Payment = () => {
             <div className="success-icon">✓</div>
             <h2 className="success-title">Plano ativado!</h2>
             <p className="success-desc">
-              Seu plano foi ativado com sucesso por 30 dias. Aproveite o bot!
+              Seu plano foi ativado com sucesso por mais 30 dias. Aproveite o bot!
             </p>
             <button
               className="btn-activate"
