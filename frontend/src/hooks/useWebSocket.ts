@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { BotStatus, LogEntry, WsMessage } from '../types/bot.types';
+import type { BotCommand, BotStatus, LogEntry, WsMessage } from '../types/bot.types';
+
+const MAX_LOGS = 100;
 
 export const useWebSocket = () => {
   const [status, setStatus] = useState<BotStatus | null>(null);
@@ -15,11 +17,8 @@ export const useWebSocket = () => {
     ws.onmessage = (event) => {
       const msg: WsMessage = JSON.parse(event.data);
 
-      if (msg.type === 'status') {
-        setStatus(msg.data);
-      } else if (msg.type === 'log') {
-        setLogs((prev) => [...msg.data, ...prev].slice(0, 100));
-      }
+      if (msg.type === 'status') setStatus(msg.data);
+      else if (msg.type === 'log') setLogs((prev) => [...msg.data, ...prev].slice(0, MAX_LOGS));
     };
 
     ws.onclose = () => console.log('WebSocket desconectado');
@@ -28,9 +27,9 @@ export const useWebSocket = () => {
     return () => ws.close();
   }, []);
 
-  const sendAction = useCallback((category: string, action: string) => {
+  const sendAction = useCallback((command: BotCommand) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ category, action }));
+      wsRef.current.send(JSON.stringify(command));
     }
   }, []);
 

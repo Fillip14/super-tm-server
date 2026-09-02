@@ -15,7 +15,15 @@ export interface BotStatus {
   amount_MP: number | null;
 }
 
-export interface WsMessage {
-  type: 'status' | 'log' | 'init';
-  data: any;
-}
+export type WsMessage =
+  | { type: 'status'; data: BotStatus }
+  | { type: 'log'; data: LogEntry[] }
+  | { type: 'init'; data: unknown };
+
+export type BotCommand =
+  | { category: 'program'; action: 'start' | 'stop' }
+  | { category: 'hunt'; action: 'start' | 'stop' }
+  | { category: 'heal'; action: 'start' | 'stop' }
+  | { category: 'client'; action: 'reopen' };
+
+export type BotCategory = BotCommand['category'];

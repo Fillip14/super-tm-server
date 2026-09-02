@@ -1,114 +1,53 @@
 import { useNavigate } from 'react-router-dom';
-import type { ReactNode } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { AppShell, TopbarButton } from '../../components/ui';
+import { Eyebrow, Heading, Mono, PageTitle } from '../../components/Typography';
+import {
+  BarPct,
+  ConnectionBadge,
+  OnOff,
+  StatCaption,
+  StatCard,
+  StatValue,
+} from '../../components/stat';
+import type { BotCommand } from '../../types/bot.types';
 
-const CONTROLS = [
+type ControlGroup = {
+  name: string;
+  desc: string;
+  actions: { label: string; tone: 'start' | 'stop'; command: BotCommand }[];
+};
+
+const startStop = (category: 'program' | 'hunt' | 'heal'): ControlGroup['actions'] => [
+  { label: '▶ Iniciar', tone: 'start', command: { category, action: 'start' } },
+  { label: '■ Parar', tone: 'stop', command: { category, action: 'stop' } },
+];
+
+const CONTROLS: ControlGroup[] = [
   {
     name: 'Program',
     desc: 'Captura de tela e posição do char',
-    category: 'program',
-    actions: [
-      { label: '▶ Iniciar', action: 'start', tone: 'start' as const },
-      { label: '■ Parar', action: 'stop', tone: 'stop' as const },
-    ],
+    actions: startStop('program'),
   },
   {
     name: 'Hunt',
     desc: 'Cavebot com waypoints configurados',
-    category: 'hunt',
-    actions: [
-      { label: '▶ Iniciar', action: 'start', tone: 'start' as const },
-      { label: '■ Parar', action: 'stop', tone: 'stop' as const },
-    ],
+    actions: startStop('hunt'),
   },
   {
     name: 'Healer',
     desc: 'Cura automática de HP e MP',
-    category: 'heal',
-    actions: [
-      { label: '▶ Iniciar', action: 'start', tone: 'start' as const },
-      { label: '■ Parar', action: 'stop', tone: 'stop' as const },
-    ],
+    actions: startStop('heal'),
   },
   {
     name: 'Reopen tibia',
     desc: 'Reabre a janela do tibia',
-    category: 'client',
-    actions: [{ label: '▶ Reabrir', action: 'reopen', tone: 'start' as const }],
+    actions: [
+      { label: '▶ Reabrir', tone: 'start', command: { category: 'client', action: 'reopen' } },
+    ],
   },
 ];
-
-const OnOff = ({ on }: { on: boolean }) => (
-  <span
-    className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.75 font-mono text-[10px] tracking-[0.06em] uppercase ${
-      on ? 'border-success/20 bg-success/10 text-success' : 'border-muted/20 bg-muted/12 text-muted'
-    }`}
-  >
-    <span className={`size-1 rounded-full bg-current ${on ? 'animate-blink' : ''}`} />
-    {on ? 'Ativo' : 'Parado'}
-  </span>
-);
-
-const BarPct = ({ value, type }: { value: number | null; type: 'hp' | 'mp' }) => {
-  const pct = value ?? 0;
-  const color = type === 'mp' ? 'bg-accent' : pct > 40 ? 'bg-success' : 'bg-error';
-  return (
-    <div className="h-1 overflow-hidden rounded-sm bg-white/5">
-      <div
-        className={`h-full rounded-sm transition-[width] duration-600 ease-in-out ${color}`}
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-};
-
-const StatCard = ({
-  label,
-  icon,
-  glow = false,
-  span2 = false,
-  children,
-}: {
-  label: string;
-  icon: string;
-  glow?: boolean;
-  span2?: boolean;
-  children: ReactNode;
-}) => (
-  <div
-    className={`flex flex-col gap-2.5 rounded-xl border bg-surface px-5 py-4.5 transition-colors duration-200 ${
-      glow ? 'border-accent/20' : 'border-line'
-    } ${span2 ? 'col-span-2' : ''}`}
-  >
-    <div className="flex items-center justify-between">
-      <span className="font-mono text-[10px] tracking-widest text-muted uppercase">{label}</span>
-      <span className="text-sm opacity-70">{icon}</span>
-    </div>
-    {children}
-  </div>
-);
-
-const StatValue = ({
-  value,
-  tone,
-}: {
-  value: string | number;
-  tone: 'accent' | 'success' | 'muted';
-}) => (
-  <div
-    className={`font-mono text-[22px] leading-none font-bold ${
-      tone === 'accent' ? 'text-accent' : tone === 'success' ? 'text-success' : 'text-muted'
-    }`}
-  >
-    {value}
-  </div>
-);
-
-const SubLabel = ({ children }: { children: ReactNode }) => (
-  <span className="text-[11px] text-muted">{children}</span>
-);
 
 export const Status = () => {
   const navigate = useNavigate();
@@ -130,55 +69,35 @@ export const Status = () => {
         </>
       }
     >
-      <main className="relative z-1 mx-auto flex max-w-250 animate-fade-up flex-col gap-6 px-8 py-10 max-[640px]:px-4 max-[640px]:py-6">
+      <main className="relative z-1 mx-auto flex max-w-250 animate-fade-up flex-col gap-6 px-4 py-6 sm:px-8 sm:py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="mb-1 font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
-              Controle
-            </p>
-            <h1 className="m-0 text-[26px] font-extrabold tracking-[-0.02em] text-content">
-              Status do bot
-            </h1>
+            <Eyebrow>Controle</Eyebrow>
+            <PageTitle>Status do bot</PageTitle>
           </div>
-
-          <div
-            className={`flex items-center gap-2.5 rounded-full border px-4 py-2 transition-colors duration-300 ${
-              botConnected ? 'border-success/25 bg-success/10' : 'border-line bg-white/3'
-            }`}
-          >
-            <span
-              className={`size-2.5 shrink-0 rounded-full ${
-                botConnected
-                  ? 'animate-blink bg-success shadow-[0_0_8px_rgba(40,200,64,0.5)]'
-                  : 'bg-muted'
-              }`}
-            />
-            <span className={`font-mono text-xs ${botConnected ? 'text-success' : 'text-muted'}`}>
-              {botConnected ? 'Bot online' : 'Aguardando bot'}
-            </span>
-          </div>
+          <ConnectionBadge connected={botConnected} />
         </div>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5 max-[640px]:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]">
           <StatCard label="Program" icon="⚙️" glow={!!status?.pos_char}>
             <div>
               <OnOff on={status?.pos_char ?? false} />
             </div>
-            <SubLabel>Posição do char</SubLabel>
+            <StatCaption>Posição do char</StatCaption>
           </StatCard>
 
           <StatCard label="Hunt" icon="⚔️" glow={!!status?.hunt}>
             <div>
               <OnOff on={status?.hunt ?? false} />
             </div>
-            <SubLabel>Cavebot</SubLabel>
+            <StatCaption>Cavebot</StatCaption>
           </StatCard>
 
           <StatCard label="Healer" icon="💊" glow={!!status?.heal}>
             <div>
               <OnOff on={status?.heal ?? false} />
             </div>
-            <SubLabel>Cura automática</SubLabel>
+            <StatCaption>Cura automática</StatCaption>
           </StatCard>
 
           <StatCard label="HP" icon="❤️">
@@ -199,7 +118,7 @@ export const Status = () => {
 
           <StatCard label="CAP" icon="🎒">
             <StatValue value={status?.cap ?? '—'} tone={status?.cap != null ? 'accent' : 'muted'} />
-            <SubLabel>Capacidade</SubLabel>
+            <StatCaption>Capacidade</StatCaption>
           </StatCard>
 
           <StatCard label="MP Pots" icon="🧪">
@@ -207,11 +126,11 @@ export const Status = () => {
               value={status?.amount_MP ?? '—'}
               tone={status?.amount_MP != null ? 'accent' : 'muted'}
             />
-            <SubLabel>Poções de mana</SubLabel>
+            <StatCaption>Poções de mana</StatCaption>
           </StatCard>
 
           {status?.minimap && (
-            <StatCard label="Minimap" icon="🗺️" span2>
+            <StatCard label="Minimap" icon="🗺️" wide>
               <img
                 src={`data:image/jpeg;base64,${status.minimap}`}
                 alt="minimap"
@@ -222,27 +141,27 @@ export const Status = () => {
         </div>
 
         {botConnected ? (
-          <section className="overflow-hidden rounded-[14px] border border-line bg-surface">
+          <section className="overflow-hidden rounded-[0.875rem] border border-line bg-surface">
             <div className="flex items-center justify-between border-b border-line px-6 py-4.5">
-              <span className="text-sm font-bold text-content">Ações</span>
+              <Heading className="text-body">Ações</Heading>
             </div>
 
             <div className="flex flex-col gap-4 px-6 py-5">
               {CONTROLS.map((control, index) => (
-                <div key={control.category}>
+                <div key={control.name}>
                   {index > 0 && <div className="mb-4 h-px bg-line" />}
-                  <div className="flex items-center justify-between gap-4 max-[640px]:flex-wrap">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-semibold text-content">{control.name}</span>
-                      <span className="font-mono text-[11px] text-muted">{control.desc}</span>
+                      <span className="text-body font-semibold text-content">{control.name}</span>
+                      <Mono className="text-micro">{control.desc}</Mono>
                     </div>
-                    <div className="flex shrink-0 gap-2 max-[640px]:w-full">
+                    <div className="flex w-full shrink-0 gap-2 sm:w-auto">
                       {control.actions.map((item) => (
                         <button
-                          key={item.action}
+                          key={item.label}
                           type="button"
-                          onClick={() => sendAction(control.category, item.action)}
-                          className={`flex cursor-pointer items-center gap-1.5 rounded-[7px] border px-4 py-2 font-display text-[13px] font-semibold whitespace-nowrap transition-all duration-150 max-[640px]:flex-1 max-[640px]:justify-center ${
+                          onClick={() => sendAction(item.command)}
+                          className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[0.4375rem] border px-4 py-2 font-display text-caption font-semibold whitespace-nowrap transition-all duration-150 sm:flex-none ${
                             item.tone === 'start'
                               ? 'border-accent/20 bg-accent/10 text-accent hover:border-accent/40 hover:bg-accent/18'
                               : 'border-error/20 bg-error/8 text-error hover:border-error/40 hover:bg-error/15'
@@ -258,21 +177,19 @@ export const Status = () => {
             </div>
           </section>
         ) : (
-          <div className="flex flex-col items-center gap-3 rounded-[14px] border border-line bg-surface px-6 py-10 text-center">
-            <span className="text-[32px] opacity-40">📡</span>
-            <h3 className="m-0 text-base font-bold text-muted">Aguardando conexão do bot</h3>
-            <p className="m-0 font-mono text-[13px] text-muted opacity-60">
-              Inicie o desktop app para habilitar os controles
-            </p>
+          <div className="flex flex-col items-center gap-3 rounded-[0.875rem] border border-line bg-surface px-6 py-10 text-center">
+            <span className="text-[2rem] opacity-40">📡</span>
+            <Heading className="text-body text-muted">Aguardando conexão do bot</Heading>
+            <Mono className="opacity-60">Inicie o desktop app para habilitar os controles</Mono>
           </div>
         )}
 
-        <section className="overflow-hidden rounded-[14px] border border-line bg-surface">
+        <section className="overflow-hidden rounded-[0.875rem] border border-line bg-surface">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-2.5">
-              <span className="text-sm font-bold text-content">Logs</span>
+              <Heading className="text-body">Logs</Heading>
               {logs.length > 0 && (
-                <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 font-mono text-[10px] text-muted">
+                <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 font-mono text-[0.625rem] text-muted">
                   {logs.length}
                 </span>
               )}
@@ -281,16 +198,14 @@ export const Status = () => {
 
           <div className="flex h-70 flex-col gap-1 overflow-y-auto px-6 pb-5 [scrollbar-color:rgba(255,255,255,0.08)_transparent] scrollbar-thin">
             {logs.length === 0 ? (
-              <span className="py-6 text-center font-mono text-xs text-muted opacity-50">
-                Nenhum log registrado
-              </span>
+              <Mono className="py-6 text-center opacity-50">Nenhum log registrado</Mono>
             ) : (
               logs.map((log, i) => (
                 <div
                   key={i}
-                  className="flex items-baseline gap-2 py-0.5 font-mono text-[11px] leading-relaxed"
+                  className="flex items-baseline gap-2 py-0.5 font-mono text-micro leading-relaxed"
                 >
-                  <span className="min-w-6 shrink-0 text-right text-[10px] text-muted/50">
+                  <span className="min-w-6 shrink-0 text-right text-[0.625rem] text-muted/50">
                     {logs.length - i}
                   </span>
                   <span>{log.time}</span>
