@@ -208,6 +208,64 @@ export const SecondaryButton = ({
   </button>
 );
 
+/* Casca das telas logadas: fundo em grade + topbar. */
+
+export const TopbarButton = ({
+  children,
+  onClick,
+  danger = false,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+  danger?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`shrink-0 cursor-pointer rounded-lg border border-line bg-transparent px-4 py-2 font-display text-sm font-semibold whitespace-nowrap text-muted transition-all duration-200 ${
+      danger ? 'hover:border-error/40 hover:text-error' : 'hover:border-white/15 hover:text-content'
+    }`}
+  >
+    {children}
+  </button>
+);
+
+export const AppShell = ({
+  onLogoClick,
+  actions,
+  children,
+  gridAlpha = '0.025',
+}: {
+  onLogoClick: () => void;
+  actions: ReactNode;
+  children: ReactNode;
+  gridAlpha?: string;
+}) => (
+  <div className="relative min-h-screen overflow-x-clip bg-bg font-display">
+    <div
+      className="pointer-events-none fixed inset-0 z-0 grid-bg"
+      style={{ ['--grid-alpha' as string]: gridAlpha }}
+    />
+
+    {/* O gap garante folga mínima entre a logo e os botões; sem ele o
+        justify-between deixa os dois se encostarem quando a tela aperta.
+        A logo encolhe antes dos botões, que têm shrink-0. */}
+    <header className="relative z-10 flex items-center justify-between gap-6 border-b border-line bg-bg/85 px-8 py-4.5 backdrop-blur-md max-[640px]:gap-4 max-[640px]:px-4 max-[640px]:py-3.5">
+      <span
+        onClick={onLogoClick}
+        className="min-w-0 shrink cursor-pointer truncate text-2xl leading-none font-extrabold tracking-[-0.03em] transition-opacity duration-200 hover:opacity-80"
+      >
+        <span className="text-content">Super</span>
+        <span className="text-accent [text-shadow:0_0_16px_rgba(0,229,255,0.4)]">TM</span>
+      </span>
+
+      <div className="flex shrink-0 items-center gap-2.5">{actions}</div>
+    </header>
+
+    {children}
+  </div>
+);
+
 export const SuccessIcon = () => (
   <div className="flex size-16 animate-success-pop items-center justify-center rounded-full border border-success/30 bg-success/12 text-[28px] text-success">
     ✓

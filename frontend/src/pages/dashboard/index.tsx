@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { AppShell, TopbarButton } from '../../components/ui';
 
 const DAYS_TOTAL = 30;
 const RING_RADIUS = 34;
@@ -39,25 +40,14 @@ export const Dashboard = () => {
   const planLabel = planInfo?.product ? (PLAN_LABELS[planInfo.product] ?? planInfo.product) : null;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-bg font-display">
-      <div className="pointer-events-none fixed inset-0 z-0 grid-bg" />
-
-      <header className="relative z-10 flex items-center justify-between border-b border-line bg-bg/85 px-8 py-4.5 backdrop-blur-md max-[600px]:px-4 max-[600px]:py-3.5">
-        <span className="text-[22px] leading-none font-extrabold tracking-[-0.03em] no-underline">
-          <span className="text-content">Super</span>
-          <span className="text-accent [text-shadow:0_0_16px_rgba(0,229,255,0.4)]">TM</span>
-        </span>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={logout}
-            className="cursor-pointer rounded-md border border-line bg-transparent px-4 py-2 font-display text-[13px] font-semibold text-muted transition-all duration-200 hover:border-error/40 hover:text-error"
-          >
-            Sair
-          </button>
-        </div>
-      </header>
-
+    <AppShell
+      onLogoClick={() => navigate('/dashboard')}
+      actions={
+        <TopbarButton onClick={logout} danger>
+          Sair
+        </TopbarButton>
+      }
+    >
       <main className="relative z-1 mx-auto flex max-w-215 animate-fade-up flex-col gap-7 px-8 py-12 max-[600px]:px-4 max-[600px]:py-7">
         <div>
           <p className="mb-1.5 font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
@@ -149,7 +139,7 @@ export const Dashboard = () => {
           />
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 };
 

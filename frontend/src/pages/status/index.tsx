@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { AppShell, TopbarButton } from '../../components/ui';
 
 const CONTROLS = [
   {
@@ -109,26 +110,6 @@ const SubLabel = ({ children }: { children: ReactNode }) => (
   <span className="text-[11px] text-muted">{children}</span>
 );
 
-const TopbarButton = ({
-  children,
-  onClick,
-  danger = false,
-}: {
-  children: ReactNode;
-  onClick: () => void;
-  danger?: boolean;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`cursor-pointer rounded-md border border-line bg-transparent px-3.5 py-1.75 font-display text-[13px] font-semibold whitespace-nowrap text-muted transition-all duration-200 ${
-      danger ? 'hover:border-error/40 hover:text-error' : 'hover:border-white/15 hover:text-content'
-    }`}
-  >
-    {children}
-  </button>
-);
-
 export const Status = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -137,45 +118,45 @@ export const Status = () => {
   const botConnected = status !== null;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-bg font-display">
-      <div className="pointer-events-none fixed inset-0 z-0 grid-bg [--grid-alpha:0.022]" />
-
-      <header className="relative z-10 flex items-center justify-between border-b border-line bg-bg/85 px-8 py-4.5 backdrop-blur-md max-[640px]:px-4 max-[640px]:py-3.5">
-        <span
-          onClick={() => navigate('/dashboard')}
-          className="cursor-pointer text-[22px] leading-none font-extrabold tracking-[-0.03em]"
-        >
-          <span className="text-content">Super</span>
-          <span className="text-accent [text-shadow:0_0_16px_rgba(0,229,255,0.4)]">TM</span>
-        </span>
-
-        <div className="flex items-center gap-2.5">
-          <span
-            className={`size-2 rounded-full transition-colors duration-300 ${
-              botConnected
-                ? 'animate-blink bg-success shadow-[0_0_8px_rgba(40,200,64,0.5)]'
-                : 'bg-muted'
-            }`}
-          />
-          <span className="font-mono text-[11px] text-muted">
-            {botConnected ? 'Bot online' : 'Aguardando bot'}
-          </span>
-          <div className="mx-1 h-5 w-px bg-line max-[640px]:hidden" />
+    <AppShell
+      gridAlpha="0.022"
+      onLogoClick={() => navigate('/dashboard')}
+      actions={
+        <>
           <TopbarButton onClick={() => navigate('/dashboard')}>← Painel</TopbarButton>
           <TopbarButton onClick={logout} danger>
             Sair
           </TopbarButton>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <main className="relative z-1 mx-auto flex max-w-250 animate-fade-up flex-col gap-6 px-8 py-10 max-[640px]:px-4 max-[640px]:py-6">
-        <div>
-          <p className="mb-1 font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
-            Controle
-          </p>
-          <h1 className="m-0 text-[26px] font-extrabold tracking-[-0.02em] text-content">
-            Status do bot
-          </h1>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="mb-1 font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
+              Controle
+            </p>
+            <h1 className="m-0 text-[26px] font-extrabold tracking-[-0.02em] text-content">
+              Status do bot
+            </h1>
+          </div>
+
+          <div
+            className={`flex items-center gap-2.5 rounded-full border px-4 py-2 transition-colors duration-300 ${
+              botConnected ? 'border-success/25 bg-success/10' : 'border-line bg-white/3'
+            }`}
+          >
+            <span
+              className={`size-2.5 shrink-0 rounded-full ${
+                botConnected
+                  ? 'animate-blink bg-success shadow-[0_0_8px_rgba(40,200,64,0.5)]'
+                  : 'bg-muted'
+              }`}
+            />
+            <span className={`font-mono text-xs ${botConnected ? 'text-success' : 'text-muted'}`}>
+              {botConnected ? 'Bot online' : 'Aguardando bot'}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3.5 max-[640px]:grid-cols-2">
@@ -298,7 +279,7 @@ export const Status = () => {
             </div>
           </div>
 
-          <div className="flex h-70 flex-col gap-1 overflow-y-auto px-6 pb-5 [scrollbar-color:rgba(255,255,255,0.08)_transparent] [scrollbar-width:thin]">
+          <div className="flex h-70 flex-col gap-1 overflow-y-auto px-6 pb-5 [scrollbar-color:rgba(255,255,255,0.08)_transparent] scrollbar-thin">
             {logs.length === 0 ? (
               <span className="py-6 text-center font-mono text-xs text-muted opacity-50">
                 Nenhum log registrado
@@ -321,6 +302,6 @@ export const Status = () => {
           </div>
         </section>
       </main>
-    </div>
+    </AppShell>
   );
 };
