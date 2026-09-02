@@ -8,9 +8,16 @@ import cookieParser from 'cookie-parser';
 const API_PREFIX = '/api';
 export const app = express();
 
+const DEFAULT_ORIGINS = ['http://localhost:5173', 'https://super-tm-server.vercel.app'];
+const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  : DEFAULT_ORIGINS;
+
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://super-tm-server.vercel.app'],
+    origin: ALLOWED_ORIGINS,
     credentials: true,
   }),
 );
