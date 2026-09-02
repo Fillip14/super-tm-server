@@ -13,12 +13,8 @@ export const createUserService = async () => {
   return await createNewUser();
 };
 
-export const patchUserService = async (
-  field: string,
-  value: string | boolean | null,
-  userId: string,
-) => {
-  const userData = await patchUser(field, value, userId);
+export const patchUserService = async (fields: Record<string, unknown>, userId: string) => {
+  const userData = await patchUser(fields, userId);
 
   return userData;
 };

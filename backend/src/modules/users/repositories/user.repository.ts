@@ -31,10 +31,10 @@ export const createNewUser = async (): Promise<string> => {
   return newUser.uuid;
 };
 
-export const patchUser = async (field: string, value: string | boolean | null, userID: string) => {
+export const patchUser = async (fields: Record<string, unknown>, userID: string) => {
   const { error: userError } = await supabase
     .from(Table.USERS)
-    .update({ [field]: value })
+    .update(fields)
     .eq(Column.UUID, userID);
 
   if (userError) throw new AppError('Erro ao atualizar usuário.', HttpStatus.INTERNAL_SERVER_ERROR);

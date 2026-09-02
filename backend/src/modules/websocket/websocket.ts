@@ -98,7 +98,7 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
   const connectionCheck = startHeartbeat(ws, 'desktop', userId);
 
   try {
-    await patchUserService(Column.ONLINE, true, userId);
+    await patchUserService({ [Column.ONLINE]: true }, userId);
   } catch (err) {
     logger.error('Erro ao atualizar status online', err);
   }
@@ -127,7 +127,7 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
     botSockets.delete(userId);
 
     try {
-      await patchUserService(Column.ONLINE, false, userId);
+      await patchUserService({ [Column.ONLINE]: false }, userId);
     } catch (err) {
       logger.error('Erro ao atualizar status online', err);
     }
