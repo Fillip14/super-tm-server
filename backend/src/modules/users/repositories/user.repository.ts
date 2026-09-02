@@ -35,10 +35,21 @@ export const patchUser = async (field: string, value: string | boolean | null, u
   const { error: userError } = await supabase
     .from(Table.USERS)
     .update({ [field]: value })
-    .eq(Column.UUID, userID)
-    .single();
+    .eq(Column.UUID, userID);
 
   if (userError) throw new AppError('Erro ao atualizar usuário.', HttpStatus.INTERNAL_SERVER_ERROR);
+
+  return;
+};
+
+export const resetAllOnline = async () => {
+  const { error: userError } = await supabase
+    .from(Table.USERS)
+    .update({ [Column.ONLINE]: false })
+    .eq(Column.ONLINE, true);
+
+  if (userError)
+    throw new AppError('Erro ao resetar status online.', HttpStatus.INTERNAL_SERVER_ERROR);
 
   return;
 };

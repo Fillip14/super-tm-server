@@ -1,4 +1,9 @@
-import { createNewUser, findUser, patchUser } from '../repositories/user.repository';
+import {
+  createNewUser,
+  findUser,
+  patchUser,
+  resetAllOnline,
+} from '../repositories/user.repository';
 
 export const findUserService = async (userID: string) => {
   return await findUser(userID);
@@ -16,6 +21,10 @@ export const patchUserService = async (
   const userData = await patchUser(field, value, userId);
 
   return userData;
+};
+
+export const resetAllOnlineService = async () => {
+  return await resetAllOnline();
 };
 
 // export const deleteUserService = async (userID: string) => {
