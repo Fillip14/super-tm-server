@@ -1,5 +1,5 @@
 import { HttpStatus } from '../../../constants/api.constants';
-import { registerNewUserService } from '../services/sing-up.service';
+import { registerNewUserService } from '../services/sign-up.service';
 import express, { Request, Response } from 'express';
 import { asyncHandler } from '../../../utils/asyncHandler';
 import logger from '../../../utils/log/logger';
