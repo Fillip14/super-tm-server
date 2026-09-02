@@ -1,5 +1,7 @@
 export interface LogEntry {
   message: string;
+  type: 'info' | 'warning' | 'error' | 'debug' | 'critical';
+  time: string;
 }
 
 export interface BotStatus {

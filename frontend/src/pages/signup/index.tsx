@@ -1,7 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import './signup.css';
+import {
+  AuthCard,
+  AuthLayout,
+  BackLink,
+  BrandLogo,
+  CardDesc,
+  CardTitle,
+  ErrorBox,
+  Field,
+  PrimaryButton,
+  SecondaryButton,
+  SuccessIcon,
+} from '../../components/ui';
+
+const PASSWORD_HINT =
+  'As senhas devem ter pelo menos 6 caracteres e incluir uma combinação de letras maiúsculas, letras minúsculas, números e símbolos.';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -60,90 +75,63 @@ export const Signup = () => {
 
   if (success) {
     return (
-      <div className="signup-root">
-        <div className="signup-bg" />
-        <div className="signup-card signup-card--success">
-          <div className="success-icon">✓</div>
-          <h2 className="success-title">Conta criada!</h2>
-          <p className="success-desc">Sua conta foi criada com sucesso. Agora é só fazer login.</p>
-          <button className="btn-primary" onClick={() => navigate('/login')}>
-            Fazer login <span className="btn-arrow">→</span>
-          </button>
-        </div>
-      </div>
+      <AuthLayout>
+        <AuthCard centered>
+          <SuccessIcon />
+          <h2 className="m-0 text-[22px] font-bold text-content">Conta criada!</h2>
+          <p className="m-0 text-sm leading-relaxed text-muted">
+            Sua conta foi criada com sucesso. Agora é só fazer login.
+          </p>
+          <PrimaryButton onClick={() => navigate('/login')} className="grow-0">
+            Fazer login
+          </PrimaryButton>
+        </AuthCard>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="signup-root">
-      <div className="signup-bg" />
-
-      <div className="signup-card">
-        <div className="signup-header">
-          <button className="signup-back" onClick={() => navigate('/')}>
-            ← Voltar
-          </button>
-          <div className="signup-logo">
-            <span className="logo-main">Super</span>
-            <span className="logo-accent">TM</span>
-          </div>
-          <h2 className="signup-title">Criar conta</h2>
-          <p className="signup-desc">Preencha os dados abaixo para criar sua conta.</p>
+    <AuthLayout>
+      <AuthCard>
+        <div className="mb-7">
+          <BackLink label="← Voltar" onClick={() => navigate('/')} />
+          <BrandLogo />
+          <CardTitle>Criar conta</CardTitle>
+          <CardDesc>Preencha os dados abaixo para criar sua conta.</CardDesc>
         </div>
 
-        <div className="signup-form">
-          <div className="field-group">
-            <label className="field-label">
-              Email {errors.email && <span className="field-error">* {errors.email}</span>}
-            </label>
-            <input
-              className={`field-input ${errors.email ? 'field-input--error' : ''}`}
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </div>
+        <div className="flex flex-col gap-4">
+          <Field
+            label="Email"
+            error={errors.email}
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
 
-          <div className="field-group">
-            <label className="field-label">Senha</label>
-            <input
-              className={`field-input ${errors.password ? 'field-input--error' : ''}`}
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <p className={`field-hint${errors.password ? ' field-hint--error' : ''}`}>
-              As senhas devem ter pelo menos 6 caracteres e incluir uma combinação de letras
-              maiúsculas, letras minúsculas, números e símbolos.
-            </p>
-          </div>
+          <Field
+            label="Senha"
+            error={errors.password}
+            hint={PASSWORD_HINT}
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
 
-          {errors.general && (
-            <div className="signup-error">
-              <span>⚠</span> {errors.general}
-            </div>
-          )}
+          {errors.general && <ErrorBox>{errors.general}</ErrorBox>}
 
-          <div className="signup-actions">
-            <button className="btn-secondary" onClick={() => navigate('/')}>
-              Cancelar
-            </button>
-            <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? (
-                <span className="spinner" />
-              ) : (
-                <>
-                  Criar conta <span className="btn-arrow">→</span>
-                </>
-              )}
-            </button>
+          <div className="mt-1 flex gap-2.5">
+            <SecondaryButton onClick={() => navigate('/')}>Cancelar</SecondaryButton>
+            <PrimaryButton onClick={handleSubmit} loading={loading}>
+              Criar conta
+            </PrimaryButton>
           </div>
         </div>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   );
 };

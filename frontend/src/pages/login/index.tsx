@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import './login.css';
+import {
+  AuthCard,
+  AuthLayout,
+  BackLink,
+  BrandLogo,
+  CardDesc,
+  CardTitle,
+  ErrorBox,
+  Field,
+  PrimaryButton,
+} from '../../components/ui';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -41,72 +51,42 @@ export const Login = () => {
   }
 
   return (
-    <div className="login-root">
-      <div className="login-bg" />
-
-      <div className="login-card">
-        {/* Header */}
-        <div className="login-header">
-          <button className="login-back" onClick={() => navigate('/')}>
-            ← Voltar
-          </button>
-          <div className="login-logo">
-            <span className="logo-main">Super</span>
-            <span className="logo-accent">TM</span>
-          </div>
-          <h2 className="login-title">Bem-vindo de volta</h2>
-          <p className="login-desc">Entre com suas credenciais para acessar o painel.</p>
+    <AuthLayout>
+      <AuthCard>
+        <div className="mb-8">
+          <BackLink label="← Voltar" onClick={() => navigate('/')} />
+          <BrandLogo />
+          <CardTitle>Bem-vindo de volta</CardTitle>
+          <CardDesc>Entre com suas credenciais para acessar o painel.</CardDesc>
         </div>
 
-        {/* Form */}
-        <div className="login-form">
-          <div className="field-group">
-            <label className="field-label">Email</label>
-            <input
-              className="field-input"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoFocus
-            />
-          </div>
+        <div className="flex flex-col gap-4">
+          <Field
+            label="Email"
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
 
-          <div className="field-group">
-            <label className="field-label">Senha</label>
-            <input
-              className="field-input"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </div>
+          <Field
+            label="Senha"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
 
-          {error && (
-            <div className="login-error">
-              <span>⚠</span> {error}
-            </div>
-          )}
+          {error && <ErrorBox>{error}</ErrorBox>}
 
-          <button
-            className={`login-btn ${loading ? 'loading' : ''}`}
-            onClick={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="spinner" />
-            ) : (
-              <>
-                <span>Entrar</span>
-                <span className="btn-arrow">→</span>
-              </>
-            )}
-          </button>
+          <PrimaryButton onClick={handleLogin} loading={loading} className="mt-1">
+            Entrar
+          </PrimaryButton>
         </div>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   );
 };

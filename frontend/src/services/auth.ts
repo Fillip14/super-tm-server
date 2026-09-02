@@ -1,15 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const validateSessionRequest = async (token: string): Promise<boolean> => {
-  const res = await fetch(`${API_URL}/api/auth/validate-session`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'client-type': 'web' },
-  });
-  if (!res.ok) throw Object.assign(new Error(res.statusText), { status: res.status });
-
-  return true;
-};
-
 export const signinRequest = async (email: string, password: string) => {
   const res = await fetch(`${API_URL}/api/auth/signin`, {
     method: 'POST',

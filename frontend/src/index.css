@@ -1,65 +1,170 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import 'tailwindcss';
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* Paleta única do produto. Antes estava duplicada nos 6 CSS de página. */
+@theme {
+  --color-bg: #080b10;
+  --color-surface: #0e1420;
+  --color-surface2: #111827;
+  --color-line: rgba(255, 255, 255, 0.07);
+  --color-line-soft: rgba(255, 255, 255, 0.06);
+  --color-accent: #00e5ff;
+  --color-accent2: #7b61ff;
+  --color-content: #e8eaf0;
+  --color-muted: #5a6070;
+  --color-error: #ff4d6d;
+  --color-success: #28c840;
+  --color-warning: #febc2e;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  --animate-fade-up: fade-up 0.6s ease both;
+  --animate-fade-in: fade-in 0.4s ease both;
+  --animate-blink: blink 2s ease-in-out infinite;
+  --animate-blink-fast: blink 1s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 4s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-card-in: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-success-pop: success-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-shake: shake 0.3s ease;
 
-body {
-  margin: 0;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
-  a:hover {
-    color: #747bff;
+
+  @keyframes success-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
-  button {
-    background-color: #f9f9f9;
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
   }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+
+  /* Sem deslocamento para baixo de propósito: translateY positivo aumenta a
+     área rolável durante a animação e faz a barra vertical piscar. */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--color-bg);
+    color: var(--color-content);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+/* Grade de fundo. Ajuste a intensidade com [--grid-alpha:...] no elemento. */
+@utility grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, var(--grid-alpha, 0.025)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, var(--grid-alpha, 0.025)) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Fundo das telas de autenticação: brilho no topo sobre a grade. */
+@utility auth-bg {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0, 229, 255, 0.07) 0%, transparent 70%),
+    linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+  background-size:
+    auto,
+    40px 40px,
+    40px 40px;
+}
+
+/* Recorte que segue o mouse: --mx / --my são setados via JS. */
+@utility mask-spotlight {
+  mask-image: radial-gradient(
+    ellipse 80% 80% at var(--mx, 50%) var(--my, 50%),
+    black 0%,
+    transparent 70%
+  );
 }

@@ -31,14 +31,25 @@ export const createNewUser = async (): Promise<string> => {
   return newUser.uuid;
 };
 
-export const patchUser = async (field: string, value: string | boolean | null, userID: string) => {
+export const patchUser = async (fields: Record<string, unknown>, userID: string) => {
   const { error: userError } = await supabase
     .from(Table.USERS)
-    .update({ [field]: value })
-    .eq(Column.UUID, userID)
-    .single();
+    .update(fields)
+    .eq(Column.UUID, userID);
 
   if (userError) throw new AppError('Erro ao atualizar usuário.', HttpStatus.INTERNAL_SERVER_ERROR);
+
+  return;
+};
+
+export const resetAllOnline = async () => {
+  const { error: userError } = await supabase
+    .from(Table.USERS)
+    .update({ [Column.ONLINE]: false })
+    .eq(Column.ONLINE, true);
+
+  if (userError)
+    throw new AppError('Erro ao resetar status online.', HttpStatus.INTERNAL_SERVER_ERROR);
 
   return;
 };

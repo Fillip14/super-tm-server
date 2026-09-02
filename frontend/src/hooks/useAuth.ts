@@ -1,5 +1,4 @@
 import {
-  validateSessionRequest,
   signinRequest,
   logoutRequest,
   signupRequest,
@@ -44,7 +43,7 @@ export const useAuth = () => {
 
       let info = null;
       try {
-        await validateSessionRequest(token);
+        // await validateSessionRequest(token);
         setAuthenticated(true);
         info = await fetchMe(token);
         setPlanInfo(info);
