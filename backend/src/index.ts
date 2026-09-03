@@ -3,7 +3,7 @@ import { app } from './server';
 import { createServer } from 'http';
 import { initWebSocket } from './modules/websocket/websocket';
 
-const PORT = 4001;
+const PORT = 4000;
 const server = createServer(app);
 
 initWebSocket(server);

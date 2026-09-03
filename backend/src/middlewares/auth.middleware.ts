@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { HttpStatus } from '../constants/api.constants';
-import { env } from '../config/env';
 import logger from '../utils/log/logger';
 
 export const authMiddleware = (requiredType?: string) => {
@@ -15,7 +14,7 @@ export const authMiddleware = (requiredType?: string) => {
     }
 
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
       if (
         (typeof requiredType === 'string' &&

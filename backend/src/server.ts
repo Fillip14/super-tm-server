@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import { HttpStatus } from './constants/api.constants';
-import { env } from './config/env';
 import { errorMiddleware } from './middlewares/error.middleware';
 import routesAuth from './modules/auth/routes/auth.routes';
 import cookieParser from 'cookie-parser';
@@ -9,20 +8,13 @@ import cookieParser from 'cookie-parser';
 const API_PREFIX = '/api';
 export const app = express();
 
-const DEFAULT_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:4173',
-  'https://super-tm-server.vercel.app',
-];
-const ALLOWED_ORIGINS = env.CORS_ORIGINS
-  ? env.CORS_ORIGINS.split(',')
-      .map((origin) => origin.trim())
-      .filter(Boolean)
-  : DEFAULT_ORIGINS;
-
 app.use(
   cors({
-    origin: ALLOWED_ORIGINS,
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'https://super-tm-server.vercel.app',
+    ],
     credentials: true,
   }),
 );
