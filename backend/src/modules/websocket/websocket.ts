@@ -18,6 +18,9 @@ interface TrackedSocket extends WebSocket {
 
 const botSockets = new Map<string, WebSocket>();
 const clientSockets = new Map<string, WebSocket>();
+// userIds com uma conexão desktop em processo de validação (fecha a janela de corrida
+// entre ler botSockets e gravar botSockets, que dura um round-trip de banco)
+const pendingDesktop = new Set<string>();
 const PING_INTERVAL = 10 * 1000;
 const PLAN_CHECK_INTERVAL = 60 * 60 * 1000;
 
@@ -50,9 +53,17 @@ const startHeartbeat = (ws: TrackedSocket, label: string, userId: string) => {
   ws.isAlive = true;
   ws.on('pong', () => (ws.isAlive = true));
 
-  return setInterval(() => {
+  const interval = setInterval(() => {
+    // Socket já fechado nunca vai emitir 'close' de novo: o interval precisa se encerrar
+    // sozinho, senão fica rodando para sempre em cima de um socket morto.
+    if (ws.readyState === WebSocket.CLOSED) {
+      clearInterval(interval);
+      return;
+    }
+
     if (ws.isAlive === false) {
       logger.info(`Conexão ${label} perdida detectada: userId=${userId}`);
+      clearInterval(interval);
       ws.terminate();
       return;
     }
@@ -60,18 +71,53 @@ const startHeartbeat = (ws: TrackedSocket, label: string, userId: string) => {
     ws.isAlive = false;
     ws.ping();
   }, PING_INTERVAL);
+
+  return interval;
+};
+
+// Remove do mapa um socket desktop que já não está mais aberto. O mapa é a fonte de
+// verdade de "está logado"; se ficar com socket morto, toda reconexão vira duplicate_login.
+const dropDeadDesktopSocket = (userId: string): void => {
+  const current = botSockets.get(userId);
+  if (!current || current.readyState === WebSocket.OPEN) return;
+
+  logger.info(`Socket desktop morto removido do mapa: userId=${userId}`);
+  botSockets.delete(userId);
+  current.terminate();
+};
+
+const setDesktopOffline = async (userId: string): Promise<void> => {
+  try {
+    await patchUserService({ [Column.ONLINE]: false }, userId);
+  } catch (err) {
+    logger.error('Erro ao atualizar status online', err);
+  }
 };
 
 const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
+  // Precisa existir antes de qualquer await: sem listener de 'error' o ws lança no EventEmitter.
+  ws.on('error', (err) => logger.error(`Erro no websocket do desktop: userId=${userId}`, err));
+
+  dropDeadDesktopSocket(userId);
+
+  const alreadyConnected = botSockets.get(userId)?.readyState === WebSocket.OPEN;
+
+  if (alreadyConnected || pendingDesktop.has(userId)) {
+    ws.send(JSON.stringify({ error: 'duplicate_login' }));
+    logger.warn(`Conexão desktop recusada, já logado: userId=${userId}`);
+    ws.close();
+    return;
+  }
+
+  pendingDesktop.add(userId);
+
   try {
-    await validateUser(userId, 'desktop', botSockets.has(userId));
+    await validateUser(userId, 'desktop', false);
   } catch (err) {
+    pendingDesktop.delete(userId);
     const status = err instanceof AppError ? err.statusCode : null;
 
-    if (status === HttpStatus.CONFLICT) {
-      ws.send(JSON.stringify({ error: 'duplicate_login' }));
-      logger.warn(`Conexão desktop recusada, já logado: userId=${userId}`);
-    } else if (status === HttpStatus.UNAUTHORIZED) {
+    if (status === HttpStatus.UNAUTHORIZED) {
       ws.send(JSON.stringify({ error: 'plan_expired' }));
       logger.warn(`Conexão desktop recusada, plano expirado: userId=${userId}`);
     } else {
@@ -79,6 +125,16 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
     }
 
     ws.close();
+    return;
+  }
+
+  pendingDesktop.delete(userId);
+
+  // O socket pode ter morrido durante a validação. Se registrar agora, o 'close' já passou
+  // e o mapa fica com socket morto + online=true preso no banco para sempre.
+  if (ws.readyState !== WebSocket.OPEN) {
+    logger.warn(`Socket desktop fechou durante a validação: userId=${userId}`);
+    await setDesktopOffline(userId);
     return;
   }
 
@@ -98,13 +154,8 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
 
   const connectionCheck = startHeartbeat(ws, 'desktop', userId);
 
-  try {
-    await patchUserService({ [Column.ONLINE]: true }, userId);
-  } catch (err) {
-    logger.error('Erro ao atualizar status online', err);
-  }
-  logger.info(`Desktop app conectado: userId=${userId}`);
-
+  // Listeners registrados antes do próximo await: um 'close' que chegue durante o patch
+  // precisa ser tratado, senão o socket fica órfão no mapa.
   ws.on('message', (raw) => {
     try {
       const { type, data } = JSON.parse(raw.toString());
@@ -113,8 +164,6 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
       logger.error('Erro processando mensagem websocket do desktop', err);
     }
   });
-
-  ws.on('error', (err) => logger.error(`Erro no websocket do desktop: userId=${userId}`, err));
 
   ws.on('close', async () => {
     clearInterval(planCheck);
@@ -126,14 +175,24 @@ const handleDesktop = async (ws: WebSocket, userId: string): Promise<void> => {
     }
 
     botSockets.delete(userId);
-
-    try {
-      await patchUserService({ [Column.ONLINE]: false }, userId);
-    } catch (err) {
-      logger.error('Erro ao atualizar status online', err);
-    }
+    await setDesktopOffline(userId);
     logger.info(`Desktop app desconectado: userId=${userId}`);
   });
+
+  try {
+    await patchUserService({ [Column.ONLINE]: true }, userId);
+  } catch (err) {
+    logger.error('Erro ao atualizar status online', err);
+  }
+
+  // Se fechou durante o patch, o 'close' já rodou e limpou; não deixar online=true preso.
+  if (ws.readyState !== WebSocket.OPEN) {
+    logger.warn(`Socket desktop fechou logo após conectar: userId=${userId}`);
+    await setDesktopOffline(userId);
+    return;
+  }
+
+  logger.info(`Desktop app conectado: userId=${userId}`);
 };
 
 const handleWeb = (ws: WebSocket, userId: string): void => {
@@ -180,8 +239,17 @@ export const initWebSocket = (server: Server): void => {
       return;
     }
 
-    if (isDesktop) await handleDesktop(ws, userId);
-    else handleWeb(ws, userId);
+    if (isDesktop) {
+      try {
+        await handleDesktop(ws, userId);
+      } catch (err) {
+        pendingDesktop.delete(userId);
+        logger.error(`Erro inesperado na conexão desktop: userId=${userId}`, err);
+        ws.close();
+      }
+    } else {
+      handleWeb(ws, userId);
+    }
   });
 };
 
