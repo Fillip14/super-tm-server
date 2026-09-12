@@ -5,7 +5,6 @@ import { findUserService, patchUserService } from '../../users/services/user.ser
 import { Column } from '../../../constants/database.constants';
 import { AppError } from '../../../errors/AppError';
 import logger from '../../../utils/log/logger';
-
 const PLAN_DAYS = 30;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -22,14 +21,9 @@ export const activatePlanController = asyncHandler(async (req: Request, res: Res
   const expiresAt = new Date(base);
   expiresAt.setDate(expiresAt.getDate() + PLAN_DAYS);
 
-  await patchUserService(
-    {
-      [Column.PRODUCT]: 'god',
-      [Column.ACTIVE]: true,
-      [Column.EXPIRES_AT]: expiresAt.toISOString(),
-    },
-    userId,
-  );
+  await patchUserService(Column.PRODUCT, 'god', userId);
+  await patchUserService(Column.ACTIVE, true, userId);
+  await patchUserService(Column.EXPIRES_AT, expiresAt.toISOString(), userId);
 
   const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / MS_PER_DAY);
 
